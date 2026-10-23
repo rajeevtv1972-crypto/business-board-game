@@ -15,6 +15,47 @@ main{max-width:1400px;margin:auto;padding:18px;display:grid;grid-template-column
 .side{display:flex;flex-direction:column;gap:14px}.panel h2{font-size:1rem;margin:0 0 10px}.players{display:grid;gap:8px}.player{padding:10px;background:#f3f5ed;border-radius:10px;border:1px solid transparent}.player.active{border-color:#39815e;box-shadow:inset 3px 0 #39815e}.playerline{display:flex;justify-content:space-between;gap:8px;font-weight:750}.small{font-size:.82rem;color:var(--muted)}button,select,input{font:inherit}button{border:0;border-radius:10px;padding:10px 12px;background:var(--green);color:white;font-weight:800;cursor:pointer;transition:transform .12s,opacity .12s}button:hover{transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}.btn2{background:#e7ece3;color:var(--ink);border:1px solid #d5ded2}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button:first-child{grid-column:1/-1}.dice{font-size:2rem;font-weight:900;color:var(--green);letter-spacing:.1em}.log{max-height:200px;overflow:auto;display:flex;flex-direction:column;gap:7px}.log div{padding-bottom:7px;border-bottom:1px solid var(--line);color:#3f5146;font-size:.86rem}.modal{position:fixed;inset:0;background:#101d17a8;display:none;align-items:center;justify-content:center;padding:18px;z-index:5}.modal.show{display:flex}.dialog{max-width:480px;width:100%;max-height:90vh;overflow:auto;background:#fffdf8;border:1px solid #d0dacd;border-radius:18px;padding:20px;box-shadow:0 25px 100px #0004}.dialog h2{margin-top:0}.dialog-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.field{display:flex;flex-direction:column;gap:5px;margin:10px 0}.field select,.field input{padding:10px;border-radius:8px;background:#fff;color:var(--ink);border:1px solid #cbd5c9}.notice{color:var(--muted);font-size:.8rem;margin-top:12px}.pill{border-radius:99px;background:#e1ebdc;padding:6px 10px;font-size:.75rem;font-weight:800}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:10px}.board{grid-template-rows:repeat(11,minmax(29px,8.3vw));gap:2px}.tile{padding:2px 1px}.tile .band{height:4px}.tile .name{font-size:clamp(7px,1.35vw,10px)}.tile .price{font-size:7px}.token{font-size:11px}.side{display:grid;grid-template-columns:1fr}.board-wrap{padding:6px}}
 </style>
+
+<style id="premium-polish">
+:root{--bg:#101b28;--panel:#fffdf8;--ink:#17251d;--muted:#6b786e;--green:#174c38;--lime:#c9ec78;--gold:#efbd50;--line:#dbe2d8;--glow:#c9ec7855}
+body{background:radial-gradient(ellipse at 12% 0%,#d8e8d5 0,transparent 42%),linear-gradient(135deg,#e7eee1,#f7f3e9 60%);background-attachment:fixed}
+header{padding:18px clamp(12px,3vw,30px);background:#fffdf8c9;backdrop-filter:blur(14px);position:sticky;top:0;z-index:4;box-shadow:0 5px 24px #17251b0b}
+.brand{letter-spacing:-.055em;text-shadow:0 2px 0 #fff}.brand span{background:linear-gradient(90deg,#174c38,#39815e);background-clip:text;-webkit-background-clip:text;color:transparent}
+.board-wrap,.panel{border-radius:20px;box-shadow:0 16px 42px #17251b10;transition:box-shadow .25s,border-color .25s}
+.board-wrap:hover,.panel:hover{box-shadow:0 18px 48px #17251b16}
+.tile{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;box-shadow:0 1px 0 #ffffff80 inset}
+.tile:not(.center):hover{z-index:2;transform:translateY(-2px) scale(1.025);box-shadow:0 6px 15px #102e2230;filter:saturate(1.12)}
+.tile.center{box-shadow:inset 0 0 0 1px #c9ec7822,0 0 35px #102e2215}
+.center h1{ text-shadow:0 0 22px #c9ec7833}
+button{box-shadow:0 3px 0 #092d20;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+button:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 5px 0 #092d20,0 8px 18px #174c3820}
+button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
+.btn2{box-shadow:0 2px 0 #cbd5c9}.btn2:hover{box-shadow:0 4px 0 #cbd5c9,0 7px 16px #17251b12}
+.player{transition:background .2s,transform .2s,border-color .2s}.player.active{background:linear-gradient(100deg,#e6f2df,#f3f5ed);transform:translateX(2px)}
+.dice{display:inline-block;min-width:150px;padding:5px 12px;border-radius:14px;background:linear-gradient(135deg,#edf4e8,#fffdf8);border:1px solid #dbe7d5;box-shadow:inset 0 1px 2px #fff,0 5px 15px #17251b0b;letter-spacing:.06em}
+.dice.rolling{animation:diceShake .11s linear infinite;color:#b17a0c;filter:drop-shadow(0 4px 5px #efbd5055)}
+@keyframes diceShake{0%{transform:rotate(-7deg) translateY(-2px)}50%{transform:rotate(7deg) translateY(2px)}100%{transform:rotate(-4deg) translateY(0)}}
+@keyframes landPop{0%{transform:scale(.92)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
+.tile.landed{animation:landPop .42s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 0 3px #efbd50,0 0 22px #efbd5080;z-index:3}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal.show .dialog{animation:modalIn .22s ease-out}
+#toastStack{position:fixed;right:18px;top:82px;z-index:20;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+.game-toast{padding:12px 16px;border-radius:14px;background:#143c2c;color:#f7ffef;border:1px solid #c9ec7866;box-shadow:0 12px 32px #102e2233;font-weight:800;animation:toastIn .28s ease-out;max-width:min(340px,calc(100vw - 36px))}
+.game-toast small{display:block;color:#c9dfcd;font-weight:500;margin-top:2px}
+@keyframes toastIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+#soundToggle{white-space:nowrap}
+@media(max-width:600px){
+ header{padding:12px;gap:8px}.brand{font-size:1.25rem}.sub{font-size:.76rem}header .pill{font-size:.68rem;padding:5px 8px}
+ main{padding:8px;gap:10px}.board-wrap{padding:4px;border-radius:13px}.board{grid-template-rows:repeat(11,minmax(27px,8.5vw));gap:1px}
+ .tile{border-radius:4px;padding:2px 0;font-size:clamp(6px,1.7vw,9px)}.tile .band{height:3px;margin-bottom:1px}.tile .name{font-size:clamp(6px,1.55vw,9px);overflow-wrap:anywhere}.tile .price{font-size:6px}.token{font-size:9px}
+ .tile.center{padding:5px;border-radius:8px}.center h1{font-size:clamp(17px,5vw,28px)}.center p{font-size:clamp(8px,2vw,12px);margin:3px}.center .status{font-size:10px;padding:4px 7px}
+ .side{gap:10px}.panel{padding:12px;border-radius:15px}.actions{gap:7px}.actions button{padding:11px 8px;font-size:.9rem;min-height:42px}
+ .players{grid-template-columns:repeat(2,minmax(0,1fr))}.player{padding:8px}.playerline{font-size:.88rem;flex-wrap:wrap}.small{font-size:.75rem}
+ .log{max-height:150px}.dialog{padding:16px;border-radius:16px}.dialog-actions button{flex:1 1 42%}
+ #toastStack{right:10px;top:70px;left:10px;align-items:flex-end}.game-toast{font-size:.88rem}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
 <header><div><div class="brand">DESI <span>TYCOON</span> 🎲</div><div class="sub">An original Indian property-trading game · Local pass-and-play prototype</div></div><div class="pill">2–4 players · No account required</div></header>
@@ -61,4 +102,60 @@ function endTurn(){if(!rolled)return;nextPlayer()}
 function build(){const p=currentPlayer(),owned=spaces.filter(s=>s.owner===p.id&&s.type==="property");if(!owned.length){modal("Build / sell","<p>You do not own any buildable properties.</p>",[{label:"Close",fn:closeModal}]);return}modal("🏠 Build / sell",'<div class="field"><label>Property</label><select id="buildSelect">'+options(owned.map(s=>({value:s.id,label:s.name+" · "+s.houses+" buildings · build "+money(s.buildCost)})))+'</select></div><p class="small">Complete the colour group to build. Buildings must be distributed evenly. Selling returns half construction cost.</p>',[{label:"Build house",fn:()=>{const s=spaces[+$("buildSelect").value],group=groupMembers(s.group);if(group.length<2||!group.every(x=>x.owner===p.id)){alert("Own the complete colour group first.");return}if(s.mortgaged||group.some(x=>x.mortgaged)){alert("Redeem mortgages before building.");return}if(s.houses>=5){alert("Maximum building level reached.");return}if(group.some(x=>x.houses<s.houses)){alert("Build evenly across the colour group.");return}if(p.cash<s.buildCost){alert("Not enough cash.");return}p.cash-=s.buildCost;s.houses++;log(p.name+" built on "+s.name+" for "+money(s.buildCost));closeModal();render()}},{label:"Sell one house",cls:"btn2",fn:()=>{const s=spaces[+$("buildSelect").value];if(!s.houses){alert("No buildings to sell here.");return}if(groupMembers(s.group).some(x=>x.houses>s.houses)){alert("Sell evenly across the colour group.");return}earn(p,Math.round(s.buildCost/2),"building sale");s.houses--;closeModal();render()}},{label:"Close",cls:"btn2",fn:closeModal}])}
 function trade(){const p=currentPlayer(),others=activePlayers().filter(x=>x.id!==p.id);if(!others.length){alert("No other active player.");return}modal("🤝 Trade",'<div class="field"><label>Trade with</label><select id="tradePlayer">'+options(others.map(x=>({value:x.id,label:x.name+" · "+money(x.cash)})))+'</select></div><div class="field"><label>Your property</label><select id="tradeOwn">'+options(spaces.filter(s=>s.owner===p.id).map(s=>({value:s.id,label:s.name+(s.mortgaged?" (mortgaged)":"")})))+'</select></div><div class="field"><label>Their property (optional)</label><select id="tradeOther"><option value="-1">No property — money only</option>'+options(spaces.filter(s=>s.owner!==null&&s.owner!==p.id).map(s=>({value:s.id,label:s.name+(s.mortgaged?" (mortgaged)":"")})))+'</select></div><div class="field"><label>Money they pay you (₹)</label><input id="tradeCash" type="number" min="0" value="0"></div><p class="small">Local trade agreement. A mortgaged property stays mortgaged when transferred.</p>',[{label:"Propose trade",fn:()=>{const other=players[+$("tradePlayer").value],own=spaces[+$("tradeOwn").value],theirId=+$("tradeOther").value,their=spaces.find(s=>s.id===theirId),cash=Math.floor(+$("tradeCash").value);if(!own||own.owner!==p.id||cash<0||cash>other.cash||(their&&their.owner!==other.id)){alert("Invalid trade or insufficient funds.");return}modal("Confirm trade",'<p>'+p.name+' gives <b>'+own.name+'</b> to '+other.name+(their?' and receives <b>'+their.name+'</b>':'')+' plus '+money(cash)+'.</p>',[{label:"Accept trade",fn:()=>{own.owner=other.id;if(their)their.owner=p.id;other.cash-=cash;p.cash+=cash;log("Trade completed: "+p.name+" and "+other.name+".");closeModal();render()}},{label:"Cancel",cls:"btn2",fn:closeModal}])}},{label:"Cancel",cls:"btn2",fn:closeModal}])}
 $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=build;$("mortgageBtn").onclick=()=>{const p=currentPlayer();modal("Mortgage / redeem",'<p>Mortgage pays half the listed property price; redeem costs 110% of that value.</p>',[{label:"Mortgage",fn:()=>assetPicker(p,"mortgage")},{label:"Redeem",fn:()=>assetPicker(p,"redeem")},{label:"Close",cls:"btn2",fn:closeModal}])};$("tradeBtn").onclick=trade;$("cardBtn").onclick=()=>{const p=currentPlayer();if(!p.jailed){alert("You are not in jail.");return}if(p.jailCard){p.jailCard--;p.jailed=0;p.jailTurns=0;log(p.name+" used a jail-free card.");render()}else alert("You do not have a jail-free card.")};$("startBtn").onclick=setup;setup();
-</script></body></html>
+</script>
+<script id="premium-polish-runtime">
+(()=>{
+ const board=document.getElementById('board'),diceEl=document.getElementById('dice'),rollBtn=document.getElementById('rollBtn');
+ if(!board||!diceEl||!rollBtn)return;
+ // Tiny synthesized sound effects; no external assets or network requests.
+ let audioCtx=null,soundOn=true;
+ function tone(freq=520,duration=.09,wave='sine',volume=.035){
+   if(!soundOn)return;
+   try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=wave;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+    osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration);
+   }catch(e){}
+ }
+ function chime(){tone(660,.1,'sine');setTimeout(()=>tone(880,.15,'sine'),75)}
+ const stack=document.createElement('div');stack.id='toastStack';document.body.appendChild(stack);
+ function toast(title,sub=''){const t=document.createElement('div');t.className='game-toast';t.textContent=title;if(sub){const s=document.createElement('small');s.textContent=sub;t.appendChild(s)}stack.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(12px)';setTimeout(()=>t.remove(),250)},2600)}
+ const soundBtn=document.createElement('button');soundBtn.id='soundToggle';soundBtn.className='btn2';soundBtn.textContent='🔊 Sound on';soundBtn.setAttribute('aria-pressed','true');
+ document.querySelector('header').appendChild(soundBtn);
+ soundBtn.addEventListener('click',()=>{soundOn=!soundOn;soundBtn.textContent=soundOn?'🔊 Sound on':'🔇 Sound off';soundBtn.setAttribute('aria-pressed',String(soundOn));if(soundOn)tone(600,.08)});
+ document.addEventListener('click',e=>{if(e.target.closest('button')&&e.target!==soundBtn&&!e.target.disabled)tone(430,.035,'triangle',.018)},true);
+ // Animate the existing roll handler rather than changing any game rules.
+ const originalRoll=rollBtn.onclick;
+ rollBtn.onclick=null;
+ rollBtn.addEventListener('click',()=>{
+   if(rollBtn.disabled)return;
+   rollBtn.disabled=true;diceEl.classList.add('rolling');tone(220,.12,'triangle',.025);
+   let ticks=0;const spin=setInterval(()=>{diceEl.textContent='⚄ '+(1+Math.floor(Math.random()*6))+'  ⚄ '+(1+Math.floor(Math.random()*6));ticks++;if(ticks>=8){clearInterval(spin);diceEl.classList.remove('rolling');if(typeof originalRoll==='function')originalRoll.call(rollBtn);rollBtn.disabled=!!document.getElementById('endBtn').disabled===false?false:rollBtn.disabled;const result=(document.getElementById('dice').textContent.match(/\d+/g)||[]).map(Number);tone(440,.08);setTimeout(()=>tone(560,.1),70);if(result.length>=2)toast('🎲 Dice rolled',result[0]+' + '+result[1]);}});
+ },{once:false});
+ // Ensure the roll button's own game-state disabled logic remains authoritative after animation.
+ const mo=new MutationObserver(()=>{
+   const logs=[...document.querySelectorAll('#log div')];
+   const latest=logs[0]?.textContent||'';
+   if(latest!==lastLog){lastLog=latest;
+    if(/ bought | won .* for | built on | building sale|house sold/i.test(latest)){chime();toast('✨ Deal made!',latest)}
+    else if(/ paid .* rent|paid .* tax|paid .* (repairs|Chest card)/i.test(latest)){tone(260,.14,'sawtooth',.025)}
+    else if(/wins the game|New match started/i.test(latest)){chime();toast(/wins the game/.test(latest)?'🏆 Victory!':'🎲 New match ready',latest)}
+   }
+ });
+ let lastLog='';const logEl=document.getElementById('log');if(logEl)mo.observe(logEl,{childList:true,subtree:true,characterData:true});
+ // Highlight the active player's current space after board renders.
+ let lastPos='';
+ const boardObserver=new MutationObserver(()=>{
+   const status=document.querySelector('#board .center .status');if(!status)return;
+   const active=[...document.querySelectorAll('#players .player.active .small')][0]?.textContent||'';
+   const m=active.match(/Space (\d+)/);if(!m)return;
+   const idx=Number(m[1])-1;if(!Number.isFinite(idx))return;
+   const tile=board.children[idx];const key=idx+':'+status.textContent;
+   if(key!==lastPos){lastPos=key;tile?.classList.remove('landed');if(tile){void tile.offsetWidth;tile.classList.add('landed');setTimeout(()=>tile.classList.remove('landed'),700)}}
+ });
+ boardObserver.observe(board,{childList:true,subtree:true});
+ // Keyboard users can close the modal with Escape.
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('modal')?.classList.remove('show')});
+})();
+</script>
+</body></html>
