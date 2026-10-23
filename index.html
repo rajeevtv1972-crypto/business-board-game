@@ -91,13 +91,17 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 <style id="save-game-style">
 .save-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.save-actions button{padding:9px 7px;font-size:.83rem}.save-status{font-size:.72rem;color:#718071;line-height:1.4;margin-top:8px}.save-status.saved{color:#236342;font-weight:800}.save-status.warn{color:#956319;font-weight:750}@media(max-width:600px){.save-actions button{min-height:40px;font-size:.8rem}}
 </style>
+
+<style id="online-multiplayer-style">
+.online-box{margin-top:14px;padding:13px;border:1px solid #d7e3d1;border-radius:14px;background:linear-gradient(145deg,#f7fbf2,#fffdf8)}.online-box h3{font-size:.9rem;margin:0 0 9px}.online-fields{display:grid;grid-template-columns:1fr;gap:7px}.online-fields input,.online-box input{min-width:0;width:100%;padding:10px;border-radius:9px;border:1px solid #cbd8c4;background:#fff;color:var(--ink);font:inherit}.online-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.online-actions button{padding:9px 6px;font-size:.8rem}.online-box #roomShare{display:grid;gap:7px;margin-top:8px}.online-box #roomShare[hidden]{display:none}.online-box #copyRoomBtn{width:100%}.online-status-online{color:#236342!important;font-weight:850}.online-status-warn{color:#956319!important;font-weight:750}.online-box .save-status{overflow-wrap:anywhere}
+</style>
 </head>
 <body>
 <header><div><div class="brand">DESI <span>TYCOON</span> 🎲</div><div class="sub">An original Indian property-trading game · Local pass-and-play prototype</div></div><div class="pill">2–4 players · No account required</div></header>
 <main>
 <section class="board-wrap"><div id="board" class="board"></div><div class="notice">Original board layout and illustrative property values. This is an early local prototype; some rule flows are simplified and should be play-tested.</div></section>
 <aside class="side">
-<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div></section>
+<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div><div class="online-box"><h3>🌐 Online room</h3><div class="online-fields"><input id="onlineName" maxlength="24" placeholder="Your display name" value="Player 1" aria-label="Display name"><input id="onlineCode" maxlength="8" placeholder="Room code" aria-label="Room code" autocomplete="off"></div><div class="online-actions"><button id="createRoomBtn">Create room</button><button id="joinRoomBtn" class="btn2">Join room</button></div><div id="onlineStatus" class="save-status">Create a room and share its code with friends.</div><div id="roomShare" hidden><input id="roomShareLink" readonly aria-label="Shareable room link"><button id="copyRoomBtn" class="btn2">Copy invite link</button></div></div></section>
 <section class="panel"><h2>Players</h2><div id="players" class="players"></div></section>
 <section class="panel leaderboard-panel"><div class="leaderboard-head"><div><h2>🏆 Tycoon leaderboard</h2><div class="small">Live rankings & match milestones</div></div><span class="leaderboard-badge">RANKED</span></div><div id="leaderboardRows" class="leaderboard-rows"></div><div id="matchStats" class="match-stats"></div><div id="milestoneFeed" class="milestone-feed"></div><div class="leaderboard-note">Empire score combines cash, property value, buildings and mortgage exposure. Transaction totals are based on events recorded in this match log.</div></section>
 <section class="panel portfolio-panel"><div class="portfolio-heading"><div><h2>📊 Player portfolio</h2><div class="small">Live wealth breakdown</div></div><span class="portfolio-live">LIVE</span></div><label class="portfolio-label" for="portfolioPlayer">View player</label><select id="portfolioPlayer" class="portfolio-select" aria-label="Choose player portfolio"></select><div id="portfolioDashboard" aria-live="polite"><div class="portfolio-empty">Start a match to see your portfolio.</div></div></section>
@@ -370,6 +374,43 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
  const baseRenderPlayers=renderPlayers;
  renderPlayers=function(){baseRenderPlayers();document.querySelectorAll('#players .player').forEach((el,i)=>{if(players[i]?.isAI){const name=el.querySelector('.playerline span');if(name&&!name.querySelector('.ai-chip'))name.insertAdjacentHTML('beforeend','<span class="ai-chip">AI</span>')}})};
  renderPlayers();
+})();
+</script>
+
+<script id="online-multiplayer-runtime">
+(()=>{
+ const $=id=>document.getElementById(id),create=$('createRoomBtn'),join=$('joinRoomBtn'),status=$('onlineStatus'),codeInput=$('onlineCode'),nameInput=$('onlineName'),share=$('roomShare'),shareLink=$('roomShareLink');
+ if(!create||!join||!status)return;
+ let socket=null,roomCode='',seatIndex=-1,applying=false,publishTimer=null,joined=false;
+ const say=(msg,kind='')=>{status.textContent=msg;status.className='save-status'+(kind?' '+kind:'')};
+ function makeSnapshot(){return {version:1,players:players.map(p=>({...p})),spaces:spaces.map(s=>({id:s.id,owner:s.owner,houses:s.houses,mortgaged:s.mortgaged})),current,rolled,lastRoll:[...lastRoll],gameOver,log:[...document.querySelectorAll('#log div')].map(x=>x.textContent).reverse()};}
+ function applySnapshot(data){if(!data||!Array.isArray(data.players)||!Array.isArray(data.spaces))return;applying=true;try{players=data.players.map(p=>({...p}));const saved=new Map(data.spaces.map(s=>[s.id,s]));spaces.forEach(s=>{const v=saved.get(s.id);s.owner=v?v.owner:null;s.houses=v?v.houses||0:0;s.mortgaged=v?!!v.mortgaged:false});current=Math.max(0,Math.min(players.length-1,Number(data.current)||0));rolled=!!data.rolled;lastRoll=Array.isArray(data.lastRoll)&&data.lastRoll.length===2?data.lastRoll:[1,1];gameOver=!!data.gameOver;$('log').innerHTML='';(data.log||[]).slice(-160).forEach(t=>{const el=document.createElement('div');el.textContent=t;$('log').appendChild(el)});render();$('dice').textContent='⚄ '+lastRoll[0]+'  ⚄ '+lastRoll[1];$('turnStatus').textContent=gameOver?'Match complete.':rolled?'Turn in progress.':'Roll the dice to begin.';}finally{applying=false}}
+ function publish(){if(applying||!socket||socket.readyState!==WebSocket.OPEN||!joined)return;clearTimeout(publishTimer);publishTimer=setTimeout(()=>{try{socket.send(JSON.stringify({type:'state',snapshot:makeSnapshot()}))}catch{}},100)}
+ function connect(code,isHost){if(socket)socket.close();roomCode=code.toUpperCase();seatIndex=-1;joined=false;const scheme=location.protocol==='https:'?'wss:':'ws:';socket=new WebSocket(scheme+'//'+location.host+'/api/room/'+roomCode);create.disabled=join.disabled=true;say('Connecting to room '+roomCode+'…');
+ socket.addEventListener('open',()=>{socket.send(JSON.stringify({type:'hello',name:(nameInput.value||'Player').trim().slice(0,24)}));say('Connected. Waiting for room state…')});
+ socket.addEventListener('message',event=>{let m;try{m=JSON.parse(event.data)}catch{return}if(m.type==='welcome'){seatIndex=Number.isInteger(m.seatIndex)?m.seatIndex:Number(m.players||1)-1;joined=true;share.hidden=false;shareLink.value=location.origin+location.pathname+'?room='+roomCode;codeInput.value=roomCode;say('Connected to room '+roomCode+' · Seat '+(seatIndex+1),'online');if(m.snapshot)applySnapshot(m.snapshot);else if(isHost){setup();publish()}else say('Connected. Ask the host to start the match.','warn');return}if(m.type==='state'&&m.snapshot&&m.from!==m.seat)applySnapshot(m.snapshot);if(m.type==='presence')say('Room '+roomCode+' · '+m.players+' player(s) connected','online')});
+ socket.addEventListener('close',()=>{create.disabled=join.disabled=false;if(joined)say('Connection lost. Rejoin using room code '+roomCode+'.','warn');joined=false});
+ socket.addEventListener('error',()=>say('Could not connect. Deploy the multiplayer Worker and try again.','warn'));
+ }
+ create.addEventListener('click',()=>{const code=Math.random().toString(36).slice(2,8).toUpperCase();connect(code,true)});
+ join.addEventListener('click',()=>{const code=(codeInput.value||new URLSearchParams(location.search).get('room')||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){say('Enter a valid room code (at least 4 characters).','warn');return}connect(code,false)});
+ codeInput.value=new URLSearchParams(location.search).get('room')||'';
+ $('copyRoomBtn').addEventListener('click',()=>{shareLink.select();try{document.execCommand('copy');say('Invite link copied — send it to your friend!','online')}catch{say('Copy the invite link from the field above.','warn')}});
+ // Publish state after game UI/state changes; remote snapshots are never echoed back.
+ const obs=new MutationObserver(publish);['players','board','log','turnName','turnStatus'].forEach(id=>{const el=$(id);if(el)obs.observe(el,{childList:true,subtree:true,characterData:true})});
+ const previousBeforeUnload=window.onbeforeunload;window.addEventListener('beforeunload',()=>{try{socket?.close()}catch{}});
+ const priorRoll=$('rollBtn').onclick;const priorEnd=$('endBtn').onclick;
+ function gate(btn,original){btn.onclick=function(ev){if(joined&&seatIndex!==current){say('It is '+(players[current]?.name||'another player')+'’s turn.','warn');return}if(joined&&players[seatIndex]?.isAI){say('AI seats are controlled by the computer.','warn');return}return original?.call(this,ev)}}
+ // The original handlers are replaced by multiplayer seat guards; AI runtime listens to clicks as usual.
+ gate($('rollBtn'),priorRoll);gate($('endBtn'),priorEnd);
+ const originalSetup=$('startBtn').onclick;
+ $('startBtn').addEventListener('click',()=>{if(joined&&seatIndex!==0){say('Only the room host can start a new match.','warn');setTimeout(()=>applySnapshot(lastHostSnapshot),0)}},true);
+ let lastHostSnapshot=null;
+ const originalApply=applySnapshot;
+ applySnapshot=function(data){lastHostSnapshot=data;originalApply(data)};
+ // Ensure host state is published after local actions even if a UI mutation was batched.
+ document.addEventListener('click',e=>{if(e.target.closest('button')&&joined)setTimeout(publish,250)},true);
+ window.addEventListener('online',()=>say('Network restored. Reconnect if the room does not update.','warn'));
 })();
 </script>
 </body></html>
