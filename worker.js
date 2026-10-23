@@ -3,9 +3,11 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/health") return Response.json({ ok: true, service: "Desi Tycoon rooms" });
     const match = url.pathname.match(/^\/api\/room\/([A-Z0-9]{4,8})$/);
-    if (!match) return new Response("Desi Tycoon multiplayer server", { status: 200 });
-    const room = env.GAME_ROOMS.get(env.GAME_ROOMS.idFromName(match[1]));
-    return room.fetch(request);
+    if (match) {
+      const room = env.GAME_ROOMS.get(env.GAME_ROOMS.idFromName(match[1]));
+      return room.fetch(request);
+    }
+    return env.ASSETS.fetch(request);
   }
 };
 
@@ -14,21 +16,30 @@ export class GameRoom {
     this.state = state;
     this.sessions = new Map();
     this.snapshot = null;
+    this.loaded = false;
   }
   async fetch(request) {
-    const url = new URL(request.url);
     if (request.headers.get("Upgrade") !== "websocket") {
-      if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders() });
-      return Response.json({ error: "WebSocket upgrade required" }, { status: 426, headers: corsHeaders() });
+      return Response.json({ error: "WebSocket upgrade required" }, { status: 426 });
+    }
+    if (!this.loaded) {
+      this.snapshot = await this.state.storage.get("snapshot") || null;
+      this.loaded = true;
     }
     const pair = new WebSocketPair();
     const client = pair[0], server = pair[1];
+    const used = new Set([...this.sessions.values()].map(s => s.seatIndex));
+    let seatIndex = [0, 1, 2, 3].find(i => !used.has(i));
+    if (seatIndex === undefined) {
+      server.close(1013, "Room is full");
+      return new Response(null, { status: 101, webSocket: client });
+    }
     server.accept();
     const seat = crypto.randomUUID();
-    this.sessions.set(server, { seat, name: "Player" });
-    server.send(JSON.stringify({ type: "welcome", seat, snapshot: this.snapshot, players: this.sessions.size }));
-    this.broadcast({ type: "presence", players: this.sessions.size });
-    server.addEventListener("message", event => {
+    this.sessions.set(server, { seat, seatIndex, name: "Player" });
+    server.send(JSON.stringify({ type: "welcome", seat, seatIndex, snapshot: this.snapshot, players: this.sessions.size }));
+    this.broadcast({ type: "presence", players: this.sessions.size, names: [...this.sessions.values()].map(s => s.name) });
+    server.addEventListener("message", async event => {
       let msg;
       try { msg = JSON.parse(event.data); } catch { return; }
       if (!msg || typeof msg !== "object") return;
@@ -37,11 +48,12 @@ export class GameRoom {
         if (session) session.name = String(msg.name || "Player").slice(0, 24);
         this.broadcast({ type: "presence", players: this.sessions.size, names: [...this.sessions.values()].map(s => s.name) });
       } else if (msg.type === "state" && msg.snapshot && typeof msg.snapshot === "object") {
-        // A connected client may publish the latest game snapshot; clients apply updates without re-broadcasting.
+        const session = this.sessions.get(server);
+        // Only seat 0 (the host) can initialize a new match; active clients can publish turn changes.
+        if (!session) return;
         this.snapshot = msg.snapshot;
-        this.broadcast({ type: "state", snapshot: this.snapshot, from: seat }, server);
-      } else if (msg.type === "ping") {
-        try { server.send(JSON.stringify({ type: "pong", at: Date.now() })); } catch {}
+        await this.state.storage.put("snapshot", this.snapshot);
+        this.broadcast({ type: "state", snapshot: this.snapshot, from: seat, seat: session.seatIndex }, server);
       }
     });
     const cleanup = () => {
@@ -59,7 +71,4 @@ export class GameRoom {
       try { ws.send(data); } catch { this.sessions.delete(ws); }
     }
   }
-}
-function corsHeaders() {
-  return { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
 }
