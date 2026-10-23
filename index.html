@@ -381,11 +381,11 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
 (()=>{
  const $=id=>document.getElementById(id),create=$('createRoomBtn'),join=$('joinRoomBtn'),status=$('onlineStatus'),codeInput=$('onlineCode'),nameInput=$('onlineName'),share=$('roomShare'),shareLink=$('roomShareLink');
  if(!create||!join||!status)return;
- let socket=null,roomCode='',seatIndex=-1,applying=false,publishTimer=null,joined=false;
+ let socket=null,roomCode='',seatIndex=-1,applying=false,suppressPublishUntil=0,publishTimer=null,joined=false;
  const say=(msg,kind='')=>{status.textContent=msg;status.className='save-status'+(kind?' '+kind:'')};
  function makeSnapshot(){return {version:1,players:players.map(p=>({...p})),spaces:spaces.map(s=>({id:s.id,owner:s.owner,houses:s.houses,mortgaged:s.mortgaged})),current,rolled,lastRoll:[...lastRoll],gameOver,log:[...document.querySelectorAll('#log div')].map(x=>x.textContent).reverse()};}
- function applySnapshot(data){if(!data||!Array.isArray(data.players)||!Array.isArray(data.spaces))return;applying=true;try{players=data.players.map(p=>({...p}));const saved=new Map(data.spaces.map(s=>[s.id,s]));spaces.forEach(s=>{const v=saved.get(s.id);s.owner=v?v.owner:null;s.houses=v?v.houses||0:0;s.mortgaged=v?!!v.mortgaged:false});current=Math.max(0,Math.min(players.length-1,Number(data.current)||0));rolled=!!data.rolled;lastRoll=Array.isArray(data.lastRoll)&&data.lastRoll.length===2?data.lastRoll:[1,1];gameOver=!!data.gameOver;$('log').innerHTML='';(data.log||[]).slice(-160).forEach(t=>{const el=document.createElement('div');el.textContent=t;$('log').appendChild(el)});render();$('dice').textContent='⚄ '+lastRoll[0]+'  ⚄ '+lastRoll[1];$('turnStatus').textContent=gameOver?'Match complete.':rolled?'Turn in progress.':'Roll the dice to begin.';}finally{applying=false}}
- function publish(){if(applying||!socket||socket.readyState!==WebSocket.OPEN||!joined)return;clearTimeout(publishTimer);publishTimer=setTimeout(()=>{try{socket.send(JSON.stringify({type:'state',snapshot:makeSnapshot()}))}catch{}},100)}
+ function applySnapshot(data){if(!data||!Array.isArray(data.players)||!Array.isArray(data.spaces))return;applying=true;suppressPublishUntil=Date.now()+700;try{players=data.players.map(p=>({...p}));const saved=new Map(data.spaces.map(s=>[s.id,s]));spaces.forEach(s=>{const v=saved.get(s.id);s.owner=v?v.owner:null;s.houses=v?v.houses||0:0;s.mortgaged=v?!!v.mortgaged:false});current=Math.max(0,Math.min(players.length-1,Number(data.current)||0));rolled=!!data.rolled;lastRoll=Array.isArray(data.lastRoll)&&data.lastRoll.length===2?data.lastRoll:[1,1];gameOver=!!data.gameOver;$('log').innerHTML='';(data.log||[]).slice(-160).forEach(t=>{const el=document.createElement('div');el.textContent=t;$('log').appendChild(el)});render();$('dice').textContent='⚄ '+lastRoll[0]+'  ⚄ '+lastRoll[1];$('turnStatus').textContent=gameOver?'Match complete.':rolled?'Turn in progress.':'Roll the dice to begin.';}finally{applying=false}}
+ function publish(){if(applying||Date.now()<suppressPublishUntil||!socket||socket.readyState!==WebSocket.OPEN||!joined)return;clearTimeout(publishTimer);publishTimer=setTimeout(()=>{try{socket.send(JSON.stringify({type:'state',snapshot:makeSnapshot()}))}catch{}},100)}
  function connect(code,isHost){if(socket)socket.close();roomCode=code.toUpperCase();seatIndex=-1;joined=false;const scheme=location.protocol==='https:'?'wss:':'ws:';socket=new WebSocket(scheme+'//'+location.host+'/api/room/'+roomCode);create.disabled=join.disabled=true;say('Connecting to room '+roomCode+'…');
  socket.addEventListener('open',()=>{socket.send(JSON.stringify({type:'hello',name:(nameInput.value||'Player').trim().slice(0,24)}));say('Connected. Waiting for room state…')});
  socket.addEventListener('message',event=>{let m;try{m=JSON.parse(event.data)}catch{return}if(m.type==='welcome'){seatIndex=Number.isInteger(m.seatIndex)?m.seatIndex:Number(m.players||1)-1;joined=true;share.hidden=false;shareLink.value=location.origin+location.pathname+'?room='+roomCode;codeInput.value=roomCode;say('Connected to room '+roomCode+' · Seat '+(seatIndex+1),'online');if(m.snapshot)applySnapshot(m.snapshot);else if(isHost){setup();publish()}else say('Connected. Ask the host to start the match.','warn');return}if(m.type==='state'&&m.snapshot&&m.from!==m.seat)applySnapshot(m.snapshot);if(m.type==='presence')say('Room '+roomCode+' · '+m.players+' player(s) connected','online')});
@@ -399,15 +399,17 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
  // Publish state after game UI/state changes; remote snapshots are never echoed back.
  const obs=new MutationObserver(publish);['players','board','log','turnName','turnStatus'].forEach(id=>{const el=$(id);if(el)obs.observe(el,{childList:true,subtree:true,characterData:true})});
  const previousBeforeUnload=window.onbeforeunload;window.addEventListener('beforeunload',()=>{try{socket?.close()}catch{}});
- const priorRoll=$('rollBtn').onclick;const priorEnd=$('endBtn').onclick;
- function gate(btn,original){btn.onclick=function(ev){if(joined&&seatIndex!==current){say('It is '+(players[current]?.name||'another player')+'’s turn.','warn');return}if(joined&&players[seatIndex]?.isAI){say('AI seats are controlled by the computer.','warn');return}return original?.call(this,ev)}}
- // The original handlers are replaced by multiplayer seat guards; AI runtime listens to clicks as usual.
- gate($('rollBtn'),priorRoll);gate($('endBtn'),priorEnd);
- const originalSetup=$('startBtn').onclick;
- $('startBtn').addEventListener('click',()=>{if(joined&&seatIndex!==0){say('Only the room host can start a new match.','warn');setTimeout(()=>applySnapshot(lastHostSnapshot),0)}},true);
  let lastHostSnapshot=null;
  const originalApply=applySnapshot;
  applySnapshot=function(data){lastHostSnapshot=data;originalApply(data)};
+ // Capture-phase guards run before the game's own handlers and the dice animation.
+ document.addEventListener('click',e=>{
+   if(!joined)return;
+   const btn=e.target.closest('button');if(!btn)return;
+   if(btn.id==='startBtn'&&seatIndex!==0){e.preventDefault();e.stopImmediatePropagation();say('Only the room host can start a new match.','warn');if(lastHostSnapshot)setTimeout(()=>applySnapshot(lastHostSnapshot),0);return}
+   const turnButtons=['rollBtn','endBtn','buildBtn','mortgageBtn','tradeBtn','cardBtn'];
+   if(turnButtons.includes(btn.id)&&(seatIndex!==current||players[seatIndex]?.isAI)){e.preventDefault();e.stopImmediatePropagation();say(players[seatIndex]?.isAI?'AI seats are controlled by the computer.':'It is '+(players[current]?.name||'another player')+'’s turn.','warn')}
+ },true);
  // Ensure host state is published after local actions even if a UI mutation was batched.
  document.addEventListener('click',e=>{if(e.target.closest('button')&&joined)setTimeout(publish,250)},true);
  window.addEventListener('online',()=>say('Network restored. Reconnect if the room does not update.','warn'));
