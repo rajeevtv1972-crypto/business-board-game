@@ -130,7 +130,7 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
  rollBtn.addEventListener('click',()=>{
    if(rollBtn.disabled)return;
    rollBtn.disabled=true;diceEl.classList.add('rolling');tone(220,.12,'triangle',.025);
-   let ticks=0;const spin=setInterval(()=>{diceEl.textContent='⚄ '+(1+Math.floor(Math.random()*6))+'  ⚄ '+(1+Math.floor(Math.random()*6));ticks++;if(ticks>=8){clearInterval(spin);diceEl.classList.remove('rolling');if(typeof originalRoll==='function')originalRoll.call(rollBtn);rollBtn.disabled=!!document.getElementById('endBtn').disabled===false?false:rollBtn.disabled;const result=(document.getElementById('dice').textContent.match(/\d+/g)||[]).map(Number);tone(440,.08);setTimeout(()=>tone(560,.1),70);if(result.length>=2)toast('🎲 Dice rolled',result[0]+' + '+result[1]);}});
+   let ticks=0;const spin=setInterval(()=>{diceEl.textContent='⚄ '+(1+Math.floor(Math.random()*6))+'  ⚄ '+(1+Math.floor(Math.random()*6));ticks++;if(ticks>=8){clearInterval(spin);diceEl.classList.remove('rolling');if(typeof originalRoll==='function')originalRoll.call(rollBtn);rollBtn.disabled=!!document.getElementById('endBtn').disabled===false?false:rollBtn.disabled;const result=(document.getElementById('dice').textContent.match(/\d+/g)||[]).map(Number);tone(440,.08);setTimeout(()=>tone(560,.1),70);if(result.length>=2)toast('🎲 Dice rolled',result[0]+' + '+result[1]);}},70);
  },{once:false});
  // Ensure the roll button's own game-state disabled logic remains authoritative after animation.
  const mo=new MutationObserver(()=>{
