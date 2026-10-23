@@ -97,7 +97,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 <main>
 <section class="board-wrap"><div id="board" class="board"></div><div class="notice">Original board layout and illustrative property values. This is an early local prototype; some rule flows are simplified and should be play-tested.</div></section>
 <aside class="side">
-<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div></section>
+<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div></section>
 <section class="panel"><h2>Players</h2><div id="players" class="players"></div></section>
 <section class="panel leaderboard-panel"><div class="leaderboard-head"><div><h2>🏆 Tycoon leaderboard</h2><div class="small">Live rankings & match milestones</div></div><span class="leaderboard-badge">RANKED</span></div><div id="leaderboardRows" class="leaderboard-rows"></div><div id="matchStats" class="match-stats"></div><div id="milestoneFeed" class="milestone-feed"></div><div class="leaderboard-note">Empire score combines cash, property value, buildings and mortgage exposure. Transaction totals are based on events recorded in this match log.</div></section>
 <section class="panel portfolio-panel"><div class="portfolio-heading"><div><h2>📊 Player portfolio</h2><div class="small">Live wealth breakdown</div></div><span class="portfolio-live">LIVE</span></div><label class="portfolio-label" for="portfolioPlayer">View player</label><select id="portfolioPlayer" class="portfolio-select" aria-label="Choose player portfolio"></select><div id="portfolioDashboard" aria-live="polite"><div class="portfolio-empty">Start a match to see your portfolio.</div></div></section>
@@ -322,6 +322,54 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
  const observer=new MutationObserver(queueSave);['players','board','log','turnName','turnStatus'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true})});
  window.addEventListener('beforeunload',()=>save(false));
  try{if(localStorage.getItem(KEY)){resumeBtn.textContent='↩️ Resume saved ✓';say('A saved match is available on this device.','saved')}}catch(e){say('Browser storage is unavailable; manual saving may not work.','warn')}
+})();
+</script>
+
+<style id="ai-opponents-style">
+#aiHint{margin:-3px 0 10px;line-height:1.45}.ai-chip{display:inline-flex;align-items:center;gap:4px;background:#e7eee1;color:#23553c;border:1px solid #cddfc4;border-radius:99px;padding:2px 7px;font-size:.68rem;font-weight:850;margin-left:5px}
+</style>
+<script id="ai-opponents-runtime">
+(()=>{
+ const countEl=document.getElementById('playerCount'),aiEl=document.getElementById('aiCount'),hint=document.getElementById('aiHint'),start=document.getElementById('startBtn');
+ if(!countEl||!aiEl||!start)return;
+ function constrain(){const max=Math.max(0,Number(countEl.value)-1);[...aiEl.options].forEach(o=>o.disabled=Number(o.value)>max);if(Number(aiEl.value)>max)aiEl.value=String(max);hint.textContent='You always play as Player 1. AI opponents take their turns automatically.'}
+ countEl.addEventListener('change',constrain);constrain();
+ // setup() is the original game initializer. Mark the selected seats as computer-controlled after it runs.
+ start.addEventListener('click',()=>{const total=Number(countEl.value),bots=Math.min(Number(aiEl.value),total-1);players.forEach((p,i)=>{p.isAI=i>0&&i>=total-bots;if(p.isAI)p.name=['','🤖 Arjun AI','🧠 Meera AI','⚡ Kabir AI'][i]||('AI Rival '+i)});render();if(bots)log('AI rivals joined the table. Their turns play automatically.');},false);
+ const modalEl=document.getElementById('modal'),actions=document.getElementById('modalActions');
+ let running=false,lastScheduled='';
+ function chooseModal(p){
+  if(!modalEl.classList.contains('show'))return false;
+  const title=(document.getElementById('modalTitle').textContent||'').toLowerCase();
+  const body=(document.getElementById('modalBody').textContent||'').toLowerCase();
+  const buttons=[...actions.querySelectorAll('button')];
+  let pick=null;
+  if(title.includes('chance')||title.includes('community chest'))pick=buttons.find(b=>/^ok$/i.test(b.textContent));
+  else if(title.includes('cash shortfall'))pick=buttons.find(b=>/mortgage property/i.test(b.textContent))||buttons.find(b=>/bankruptcy/i.test(b.textContent));
+  else if(title.includes('auction'))pick=buttons.find(b=>/everyone folds/i.test(b.textContent))||buttons.find(b=>/award to highest/i.test(b.textContent));
+  else if(body.includes('would you like to buy this asset')){
+   const space=spaces[p.pos],goodDeal=space&&space.price>0&&p.cash-space.price>=Math.max(100,space.price*.18);
+   pick=buttons.find(b=>/buy property/i.test(b.textContent)&&goodDeal)||buttons.find(b=>/^auction$/i.test(b.textContent))||buttons.find(b=>/close/i.test(b.textContent));
+  }else if(title.includes('confirm trade'))pick=buttons.find(b=>/cancel/i.test(b.textContent));
+  else pick=buttons.find(b=>/close|cancel|ok/i.test(b.textContent));
+  if(pick){pick.click();return true}return false;
+ }
+ function tick(){
+  if(running||!players.length||gameOver||moving)return;
+  const p=players[current];if(!p||!p.isAI)return;
+  running=true;
+  try{
+   if(modalEl.classList.contains('show')){chooseModal(p);setTimeout(()=>{running=false},450);return}
+   if(!rolled){const key=current+':roll';if(lastScheduled===key){running=false;return}lastScheduled=key;setTimeout(()=>{if(players[current]?.isAI&&!rolled&&!gameOver)document.getElementById('rollBtn').click();running=false},650);return}
+   const key=current+':end';if(lastScheduled===key){running=false;return}lastScheduled=key;
+   setTimeout(()=>{if(players[current]?.isAI&&rolled&&!moving&&!modalEl.classList.contains('show')&&!gameOver){document.getElementById('endBtn').click()}running=false;lastScheduled=''},650);
+  }catch(e){running=false}
+ }
+ setInterval(tick,300);
+ // AI names remain clearly labelled in player list and leaderboard; save/resume already serializes player fields.
+ const baseRenderPlayers=renderPlayers;
+ renderPlayers=function(){baseRenderPlayers();document.querySelectorAll('#players .player').forEach((el,i)=>{if(players[i]?.isAI){const name=el.querySelector('.playerline span');if(name&&!name.querySelector('.ai-chip'))name.insertAdjacentHTML('beforeend','<span class="ai-chip">AI</span>')}})};
+ renderPlayers();
 })();
 </script>
 </body></html>
