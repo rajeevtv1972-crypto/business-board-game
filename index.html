@@ -56,6 +56,27 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
+<style id="property-card-polish">
+.property-showcase{position:relative;overflow:hidden;border-radius:18px;border:1px solid #d7dfd1;background:linear-gradient(145deg,#fffef9,#eef4e9);box-shadow:0 12px 30px #102e2214;animation:propertyReveal .42s cubic-bezier(.2,.8,.2,1);color:#17251d}
+.property-showcase:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--property-color,#174c38)}
+.property-showcase .property-ribbon{height:12px;background:var(--property-color,#174c38);box-shadow:inset 0 -2px 0 #0001}
+.property-showcase .property-inner{padding:16px}
+.property-showcase .property-kicker{font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#718073}
+.property-showcase .property-name{font-size:1.45rem;font-weight:950;letter-spacing:-.045em;margin:3px 0 2px}
+.property-showcase .property-group{display:inline-flex;padding:5px 9px;border-radius:99px;background:#e5ecdf;font-size:.75rem;font-weight:850}
+.property-showcase .property-price{font-size:1.65rem;font-weight:950;color:#174c38;margin:12px 0}
+.property-showcase .property-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.property-showcase .property-stat{padding:10px;border:1px solid #dce4d7;background:#ffffffb8;border-radius:11px}
+.property-showcase .property-stat small{display:block;color:#748074;font-size:.72rem;font-weight:750}
+.property-showcase .property-stat b{display:block;font-size:1.02rem;margin-top:2px}
+.property-showcase .property-owner{display:flex;align-items:center;gap:8px;padding-top:12px;margin-top:12px;border-top:1px solid #dce4d7;font-size:.84rem}
+.property-showcase .owner-dot{width:11px;height:11px;border-radius:50%;background:var(--owner-color,#9aa39a);box-shadow:0 0 0 3px #0000000a}
+.property-showcase .property-note{font-size:.78rem;color:#667466;margin:12px 0 0}
+@keyframes propertyReveal{0%{opacity:0;transform:translateY(14px) scale(.96);filter:blur(2px)}65%{transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes purchaseFlash{0%{box-shadow:0 0 0 0 #c9ec7800}35%{box-shadow:0 0 0 7px #c9ec78a8,0 0 35px #c9ec78a0}100%{box-shadow:0 0 0 0 #c9ec7800}}
+.tile.just-purchased{animation:purchaseFlash .85s ease-out}
+@media(max-width:600px){.property-showcase .property-inner{padding:13px}.property-showcase .property-name{font-size:1.25rem}.property-showcase .property-price{font-size:1.45rem}}
+</style>
 </head>
 <body>
 <header><div><div class="brand">DESI <span>TYCOON</span> 🎲</div><div class="sub">An original Indian property-trading game · Local pass-and-play prototype</div></div><div class="pill">2–4 players · No account required</div></header>
@@ -117,7 +138,17 @@ function move(p,steps){
  };
  walk();
 }
-function resolve(p,s){log(p.name+" landed on "+s.name+".");if(s.type==="property"||s.type==="rail"||s.type==="utility"){if(s.owner===null){modal(s.name,"<p>Unowned asset · Price: <b>"+money(s.price)+"</b></p><p>Buy it or send it to auction.</p>",[{label:"Buy property",fn:()=>{if(p.cash>=s.price){p.cash-=s.price;s.owner=p.id;log(p.name+" bought "+s.name+" for "+money(s.price));closeModal();render()}else{closeModal();auction(s)}}},{label:"Auction",fn:()=>{closeModal();auction(s)}}])}else if(s.owner!==p.id&&!s.mortgaged&&!players[s.owner].bankrupt){let rent=s.rent;if(s.type==="property"&&groupMembers(s.group).every(x=>x.owner===s.owner))rent*=2;if(s.houses)rent=[s.rent,s.rent*5,s.rent*15,s.rent*35,s.rent*45,s.rent*55][s.houses];if(s.type==="rail")rent=25*spaces.filter(x=>x.type==="rail"&&x.owner===s.owner).length;if(s.type==="utility")rent=lastRoll.reduce((a,b)=>a+b,0)*10;if(pay(p,rent,"rent to "+players[s.owner].name))earn(players[s.owner],rent,"rent from "+p.name);render()}}else if(s.type==="tax"){pay(p,s.rent,"tax");render()}else if(s.type==="chance"||s.type==="chest"){drawCard(p,s.type);render()}else if(s.id===30){p.pos=10;p.jailed=1;p.jailTurns=0;log(p.name+" was sent to jail.");render()}else render()}
+function propertyCardMarkup(s,p){
+ const groupNames={brown:"Earth",light:"Coastal",pink:"Royal",orange:"Sunset",red:"Capital",yellow:"Golden",green:"Prosperity",blue:"Premium",rail:"Railway",utility:"Utilities"};
+ const groupColor=C[s.group]||C.none,kind=s.type==="property"?"PROPERTY":s.type==="rail"?"TRANSPORT":"UTILITY";
+ const rentLabel=s.type==="rail"?"Base fare":s.type==="utility"?"Base rent":"Base rent";
+ const owner=s.owner===null?"Bank":players[s.owner]?.name||"Bank";
+ const ownerColor=s.owner===null?"#9aa39a":players[s.owner]?.color||"#9aa39a";
+ const rent=s.type==="property"?money(s.rent):s.type==="rail"?money(s.rent)+" × railways owned":s.type==="utility"?money(s.rent)+" × dice total":money(s.rent);
+ const priceLabel=s.price?money(s.price):"—";
+ return '<div class="property-showcase" style="--property-color:'+groupColor+';--owner-color:'+ownerColor+'"><div class="property-ribbon"></div><div class="property-inner"><div class="property-kicker">Desi Tycoon · '+kind+'</div><div class="property-name">'+s.name+'</div><span class="property-group">'+(groupNames[s.group]||"Special asset")+' group</span><div class="property-price">'+priceLabel+'</div><div class="property-stats"><div class="property-stat"><small>'+rentLabel+'</small><b>'+rent+'</b></div><div class="property-stat"><small>Purchase price</small><b>'+priceLabel+'</b></div></div><div class="property-owner"><span class="owner-dot"></span><span>Current owner: <b>'+owner+'</b></span></div><p class="property-note">'+(s.type==="property"?"Own the full colour group to unlock building opportunities.":s.type==="rail"?"Rail rent increases as the owner collects more railway assets.":"Utility rent depends on the dice total.")+'</p></div></div><p>Would you like to buy this asset or send it to auction?</p>';
+}
+function resolve(p,s){log(p.name+" landed on "+s.name+".");if(s.type==="property"||s.type==="rail"||s.type==="utility"){if(s.owner===null){modal("🏡 "+s.name,propertyCardMarkup(s,p),[{label:"Buy property",fn:()=>{if(p.cash>=s.price){p.cash-=s.price;s.owner=p.id;log(p.name+" bought "+s.name+" for "+money(s.price));closeModal();render();if(window.desitycoonPurchased)window.desitycoonPurchased(s,p)}else{closeModal();auction(s)}}},{label:"Auction",fn:()=>{closeModal();auction(s)}}])}else if(s.owner!==p.id&&!s.mortgaged&&!players[s.owner].bankrupt){let rent=s.rent;if(s.type==="property"&&groupMembers(s.group).every(x=>x.owner===s.owner))rent*=2;if(s.houses)rent=[s.rent,s.rent*5,s.rent*15,s.rent*35,s.rent*45,s.rent*55][s.houses];if(s.type==="rail")rent=25*spaces.filter(x=>x.type==="rail"&&x.owner===s.owner).length;if(s.type==="utility")rent=lastRoll.reduce((a,b)=>a+b,0)*10;if(pay(p,rent,"rent to "+players[s.owner].name))earn(players[s.owner],rent,"rent from "+p.name);render()}}else if(s.type==="tax"){pay(p,s.rent,"tax");render()}else if(s.type==="chance"||s.type==="chest"){drawCard(p,s.type);render()}else if(s.id===30){p.pos=10;p.jailed=1;p.jailTurns=0;log(p.name+" was sent to jail.");render()}else render()}
 function auction(s){const eligible=activePlayers().filter(p=>p.cash>0);if(!eligible.length){log(s.name+" went unsold.");return}let highest=0,winner=null;const body='<p>Players can bid in turn. Enter a bid, then award it to the highest bidder; if everyone folds, the property stays with the bank.</p><div class="field"><label>Bidder</label><select id="bidder">'+options(eligible.map(p=>({value:p.id,label:p.name+" · "+money(p.cash)})))+'</select></div><div class="field"><label>Bid amount (₹)</label><input id="bidAmount" type="number" min="1" value="1"></div><div id="bidState" class="small">Current highest: ₹0</div>';modal("🔨 Auction — "+s.name,body,[{label:"Place bid",fn:()=>{const p=players[+$("bidder").value],amt=Math.floor(+$("bidAmount").value);if(amt<=highest||amt>p.cash||amt<1){$("bidState").textContent="Bid must beat ₹"+highest+" and not exceed cash.";return}highest=amt;winner=p;$("bidState").textContent="Current highest: "+money(highest)+" by "+winner.name;log(p.name+" bid "+money(amt)+" for "+s.name);$("bidAmount").value=Math.min(p.cash,highest+1)}},{label:"Award to highest",fn:()=>{if(winner){winner.cash-=highest;s.owner=winner.id;log(winner.name+" won "+s.name+" for "+money(highest))}else log(s.name+" went unsold and returned to the bank.");closeModal();render()}},{label:"Everyone folds",cls:"btn2",fn:()=>{log(s.name+" went unsold and returned to the bank.");closeModal();render()}}])}
 function drawCard(p,type){const cards=type==="chance"?[{t:"Advance to Jaipur",f:()=>{const old=p.pos;p.pos=6;if(old>6)earn(p,200,"passing START");resolve(p,spaces[6])}},{t:"Bank pays you ₹100",f:()=>earn(p,100,"Chance card")},{t:"Pay repairs ₹50",f:()=>pay(p,50,"repairs")},{t:"Get Out of Jail card",f:()=>{p.jailCard++;log(p.name+" received a jail-free card.")}},{t:"Go to Jail",f:()=>{p.pos=10;p.jailed=1;p.jailTurns=0;log(p.name+" was sent to jail.")}}]:[{t:"Collect ₹50",f:()=>earn(p,50,"Chest card")},{t:"Pay ₹50",f:()=>pay(p,50,"Chest card")},{t:"Get Out of Jail card",f:()=>{p.jailCard++;log(p.name+" received a jail-free card.")}}];const card=cards[Math.floor(Math.random()*cards.length)];modal(type==="chance"?"❓ Chance":"📦 Community Chest",'<p>'+card.t+'</p>',[{label:"OK",fn:()=>{closeModal();card.f();render()}}])}
 function roll(){if(rolled||gameOver||moving)return;const p=currentPlayer();lastRoll=[dice(),dice()];const total=lastRoll[0]+lastRoll[1];$("dice").textContent="⚄ "+lastRoll[0]+"  ⚄ "+lastRoll[1];rolled=true;if(p.jailed){p.jailTurns++;if(lastRoll[0]===lastRoll[1]){p.jailed=0;p.jailTurns=0;log(p.name+" rolled doubles and escaped jail.");move(p,total)}else if(p.jailTurns>=3){if(pay(p,100,"third failed jail attempt")){p.jailed=0;p.jailTurns=0;move(p,total)}}else{$("turnStatus").textContent="No doubles. You remain in jail ("+p.jailTurns+"/3).";log(p.name+" failed to roll doubles.");render()}}else move(p,total);$("endBtn").disabled=false;render()}
@@ -141,6 +172,11 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
    }catch(e){}
  }
  function chime(){tone(660,.1,'sine');setTimeout(()=>tone(880,.15,'sine'),75)}
+ window.desitycoonPurchased=(space,player)=>{
+   chime();toast('🏡 Property acquired!',player.name+' now owns '+space.name+' · '+money(space.price));
+   const tile=document.getElementById('board')?.children[space.id];
+   if(tile){tile.classList.remove('just-purchased');void tile.offsetWidth;tile.classList.add('just-purchased');setTimeout(()=>tile.classList.remove('just-purchased'),900)}
+ };
  window.desitycoonStepSound=(step)=>{if(step%2===0)tone(300+step*8,.035,'triangle',.012)};
  window.desitycoonArrival=()=>{tone(540,.07,'sine',.02);setTimeout(()=>tone(700,.09,'sine',.018),55)};
  const stack=document.createElement('div');stack.id='toastStack';document.body.appendChild(stack);
