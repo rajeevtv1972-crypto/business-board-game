@@ -1,6 +1,11 @@
-name = "desi-tycoon-multiplayer"
+name = "business-board-game"
 main = "worker.js"
 compatibility_date = "2026-10-24"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
 
 [[durable_objects.bindings]]
 name = "GAME_ROOMS"
