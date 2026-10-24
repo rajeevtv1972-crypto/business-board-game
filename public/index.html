@@ -101,12 +101,26 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 <main>
 <section id="currentTurnPanel" class="panel current-turn-panel"><h2>Current turn</h2><div id="turnName">Player 1</div><div id="dice" class="dice">⚄ ⚄</div><div id="turnStatus" class="small">Roll the dice to begin.</div><div class="actions" style="margin-top:12px"><button id="rollBtn">🎲 Roll dice</button><button id="endBtn" class="btn2" disabled>End turn</button><button id="buildBtn" class="btn2">🏠 Build / sell</button><button id="mortgageBtn" class="btn2">🏦 Mortgage / redeem</button><button id="tradeBtn" class="btn2">🤝 Trade</button><button id="cardBtn" class="btn2">🃏 Use jail card</button></div></section>
 
+<nav id="quickTools" class="quick-tools" aria-label="Game information panels">
+  <button type="button" class="tool-button" data-open-tool="players" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">👥</span> Players</button>
+  <button type="button" class="tool-button" data-open-tool="online" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">🌐</span> Online Room</button>
+  <button type="button" class="tool-button" data-open-tool="portfolio" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">📊</span> Portfolio</button>
+  <button type="button" class="tool-button" data-open-tool="leaderboard" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">🏆</span> Leaderboard</button>
+</nav>
+<section id="toolPanelHost" class="tool-panel-host" hidden aria-live="polite">
+ <div class="tool-panel-host-head"><span id="toolPanelTitle">Game details</span><button type="button" id="closeToolPanelBtn" class="btn2">Close ✕</button></div>
+ <section id="playersToolPanel" class="panel tool-panel" data-tool-panel="players" hidden><h2>Players</h2><div id="players" class="players"></div></section>
+ <section id="onlineRoomToolPanel" class="panel tool-panel" data-tool-panel="online" hidden><div class="online-box"><h2>🌐 Online Room</h2><div class="online-fields"><input id="onlineName" maxlength="24" placeholder="Your display name" value="Player 1" aria-label="Display name"><input id="onlineCode" maxlength="8" placeholder="Room code" aria-label="Room code" autocomplete="off"></div><div class="online-actions"><button id="createRoomBtn">Create room</button><button id="joinRoomBtn" class="btn2">Join room</button></div><div id="onlineStatus" class="save-status">Create a room and share its code with friends.</div><div id="roomShare" hidden><input id="roomShareLink" readonly aria-label="Shareable room link"><button id="copyRoomBtn" class="btn2">Copy invite link</button></div></div></section>
+ <section id="portfolioToolPanel" class="panel tool-panel" data-tool-panel="portfolio" hidden><div class="portfolio-heading"><div><h2>📊 Player portfolio</h2><div class="small">Live wealth breakdown</div></div><span class="portfolio-live">LIVE</span></div><label class="portfolio-label" for="portfolioPlayer">View player</label><select id="portfolioPlayer" class="portfolio-select" aria-label="Choose player portfolio"></select><div id="portfolioDashboard" aria-live="polite"><div class="portfolio-empty">Start a match to see your portfolio.</div></div></section>
+ <section id="leaderboardToolPanel" class="panel tool-panel" data-tool-panel="leaderboard" hidden><div class="leaderboard-head"><div><h2>🏆 Tycoon leaderboard</h2><div class="small">Live rankings & match milestones</div></div><span class="leaderboard-badge">RANKED</span></div><div id="leaderboardRows" class="leaderboard-rows"></div><div id="matchStats" class="match-stats"></div><div id="milestoneFeed" class="milestone-feed"></div><div class="leaderboard-note">Empire score combines cash, property value, buildings and mortgage exposure. Transaction totals are based on events recorded in this match log.</div></section>
+</section>
+
 <section class="board-wrap"><div id="board" class="board"></div><div class="notice">Original board layout and illustrative property values. This is an early local prototype; some rule flows are simplified and should be play-tested.</div></section>
 <aside class="side">
-<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div><div class="online-box"><h3>🌐 Online room</h3><div class="online-fields"><input id="onlineName" maxlength="24" placeholder="Your display name" value="Player 1" aria-label="Display name"><input id="onlineCode" maxlength="8" placeholder="Room code" aria-label="Room code" autocomplete="off"></div><div class="online-actions"><button id="createRoomBtn">Create room</button><button id="joinRoomBtn" class="btn2">Join room</button></div><div id="onlineStatus" class="save-status">Create a room and share its code with friends.</div><div id="roomShare" hidden><input id="roomShareLink" readonly aria-label="Shareable room link"><button id="copyRoomBtn" class="btn2">Copy invite link</button></div></div></section>
-<section class="panel"><h2>Players</h2><div id="players" class="players"></div></section>
-<section class="panel leaderboard-panel"><div class="leaderboard-head"><div><h2>🏆 Tycoon leaderboard</h2><div class="small">Live rankings & match milestones</div></div><span class="leaderboard-badge">RANKED</span></div><div id="leaderboardRows" class="leaderboard-rows"></div><div id="matchStats" class="match-stats"></div><div id="milestoneFeed" class="milestone-feed"></div><div class="leaderboard-note">Empire score combines cash, property value, buildings and mortgage exposure. Transaction totals are based on events recorded in this match log.</div></section>
-<section class="panel portfolio-panel"><div class="portfolio-heading"><div><h2>📊 Player portfolio</h2><div class="small">Live wealth breakdown</div></div><span class="portfolio-live">LIVE</span></div><label class="portfolio-label" for="portfolioPlayer">View player</label><select id="portfolioPlayer" class="portfolio-select" aria-label="Choose player portfolio"></select><div id="portfolioDashboard" aria-live="polite"><div class="portfolio-empty">Start a match to see your portfolio.</div></div></section>
+<section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div></section>
+
+
+
 
 <section class="panel"><h2>Game log</h2><div id="log" class="log"></div></section>
 </aside></main>
@@ -481,6 +495,28 @@ main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
  #currentTurnPanel .actions button:first-child{grid-column:1/-1}
 }
 </style>
+
+<style id="quick-tool-panels-style">
+.quick-tools{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-self:start}
+.tool-button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 12px;border:1px solid #cdddcf;border-radius:13px;background:linear-gradient(145deg,#fffef9,#edf5e9);color:#174c38;box-shadow:0 3px 0 #d7e4d4;font-weight:850;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+.tool-button:hover{transform:translateY(-2px);box-shadow:0 5px 0 #d7e4d4,0 8px 18px #17251b14}
+.tool-button[aria-expanded="true"]{background:linear-gradient(145deg,#174c38,#103c2c);color:#fff;border-color:#174c38;box-shadow:inset 0 0 0 1px #ffffff24,0 4px 0 #0d3829}
+.tool-button span{font-size:1.15rem}
+.tool-panel-host{grid-column:1/-1;min-width:0;background:#ffffffc9;border:1px solid #d6e1d3;border-radius:16px;padding:12px;box-shadow:0 12px 30px #17251b12;animation:toolPanelOpen .2s ease-out both}
+.tool-panel-host[hidden],.tool-panel[hidden],[hidden]{display:none!important}
+.tool-panel-host-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#174c38;font-weight:900}
+.tool-panel{margin:0}
+.tool-panel-host .online-box{margin-top:0}
+.tool-panel-host .players{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+@keyframes toolPanelOpen{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:650px){
+ .quick-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .tool-button{min-height:44px;font-size:.88rem;padding:9px 6px;gap:5px}
+ .tool-panel-host{padding:8px;border-radius:12px}
+ .tool-panel-host .players{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.tool-panel-host,.tool-button{animation:none!important;transition:none!important}}
+</style>
 <script id="ai-opponents-runtime">
 (()=>{
  const countEl=document.getElementById('playerCount'),aiEl=document.getElementById('aiCount'),hint=document.getElementById('aiHint'),start=document.getElementById('startBtn');
@@ -564,4 +600,38 @@ main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
  window.addEventListener('online',()=>say('Network restored. Reconnect if the room does not update.','warn'));
 })();
 </script>
+
+<script id="quick-tool-panels-runtime">
+(()=>{
+ const host=document.getElementById('toolPanelHost');
+ const buttons=[...document.querySelectorAll('[data-open-tool]')];
+ const panels=[...document.querySelectorAll('[data-tool-panel]')];
+ const title=document.getElementById('toolPanelTitle');
+ const close=document.getElementById('closeToolPanelBtn');
+ const labels={players:'Players',online:'Online Room',portfolio:'Player Portfolio',leaderboard:'Tycoon Leaderboard'};
+ let active='';
+ function closePanels(){
+  active='';
+  host.hidden=true;
+  panels.forEach(p=>p.hidden=true);
+  buttons.forEach(b=>{b.setAttribute('aria-expanded','false');b.classList.remove('active')});
+ }
+ function openPanel(key){
+  if(active===key){closePanels();return}
+  active=key;
+  panels.forEach(p=>p.hidden=p.dataset.toolPanel!==key);
+  host.hidden=false;
+  title.textContent=labels[key]||'Game details';
+  buttons.forEach(b=>{
+    const chosen=b.dataset.openTool===key;
+    b.setAttribute('aria-expanded',String(chosen));
+    b.classList.toggle('active',chosen);
+  });
+ }
+ buttons.forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.openTool)));
+ close.addEventListener('click',closePanels);
+ closePanels();
+})();
+</script>
+
 </body></html>
