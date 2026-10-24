@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 35
     env:
       CI: "true"
+      DO_NOT_TRACK: "1"
     steps:
       - name: Check out game
         uses: actions/checkout@v4
@@ -43,9 +44,6 @@ jobs:
 
       - name: Install Capacitor dependencies
         run: npm install --no-audit --no-fund
-
-      - name: Disable Capacitor telemetry prompts
-        run: npx cap telemetry off
 
       - name: Generate Android project
         run: npx cap add android
