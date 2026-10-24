@@ -598,6 +598,19 @@ main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
 .delhi-property-card-art{display:block;width:min(100%,280px);max-height:44vh;height:auto;object-fit:contain;margin:12px auto 16px;border:1px solid #d7c79f;border-radius:14px;background:#f9f4e8;box-shadow:0 12px 30px #1c2e241c}
 @media(max-width:520px){.delhi-property-card-art{width:min(100%,235px);max-height:37vh;margin:8px auto 12px}}
 </style>
+
+<style id="taller-tiles-smaller-center">
+/* Give each outer property space more height and reduce the empty green center. */
+.board{aspect-ratio:.91 / 1}
+.tile.center{grid-column:3/10;grid-row:3/10}
+@media(max-width:900px){.board{aspect-ratio:.89 / 1}}
+@media(max-width:600px){
+ .board{aspect-ratio:.86 / 1}
+ .tile.center{grid-column:3/10;grid-row:3/10}
+ .center h1{font-size:clamp(12px,4vw,21px)}
+ .center p{font-size:clamp(6px,1.8vw,9px)}
+}
+</style>
 <script id="ai-opponents-runtime">
 (()=>{
  const countEl=document.getElementById('playerCount'),aiEl=document.getElementById('aiCount'),hint=document.getElementById('aiHint'),start=document.getElementById('startBtn');
