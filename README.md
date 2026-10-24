@@ -44,3 +44,33 @@ This is a playable prototype, not a complete rule-accurate game. Auction, debt, 
 ## Original work
 
 The UI, board layout, and artwork are original and do not include assets from the commercial game that inspired the concept.
+
+## Android APK
+
+This repository can build an Android app that bundles the complete game UI for local play and connects to the deployed Cloudflare Worker for online room multiplayer.
+
+### Download the APK
+
+1. Open the repository's **Actions** tab.
+2. Select **Build Chiranth's Business Android APK**.
+3. Open the latest successful run.
+4. Download the \`chiranths-business-android-apk\` artifact and extract \`app-debug.apk\`.
+5. Transfer it to your Android phone and install it. Android may ask you to allow installation from that source.
+
+The workflow runs automatically when game files or Android build configuration change. You can also run it manually with **Actions → Build Chiranth's Business Android APK → Run workflow**. Artifacts are retained for 14 days.
+
+This is a debug/sideload APK for personal testing, not a Play Store release. A Play Store release needs a release build signed with a private release key.
+
+### Build on your own computer
+
+Install Node.js 22+, Java 21, and Android Studio with Android SDK API 36. In the repository folder, run:
+
+\`\`\`bash
+npm install
+npx cap add android
+npx cap sync android
+npx cap open android
+\`\`\`
+
+Then use Android Studio to build or run the app.
+

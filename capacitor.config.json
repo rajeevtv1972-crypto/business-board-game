@@ -1,0 +1,8 @@
+{
+  "appId": "com.chiranth.business",
+  "appName": "Chiranth's Business",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https"
+  }
+}
