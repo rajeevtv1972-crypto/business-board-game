@@ -126,6 +126,35 @@ function setup(){const n=+$("playerCount").value;players=Array.from({length:n},(
 function activePlayers(){return players.filter(p=>!p.bankrupt)}
 function currentPlayer(){return players[current]}
 function nextPlayer(){if(activePlayers().length<=1){gameOver=true;log(activePlayers()[0]?.name+" wins the game!");render();return}let i=current;do{i=(i+1)%players.length}while(players[i].bankrupt);current=i;rolled=false;render();$("turnStatus").textContent=players[current].jailed?"In jail — roll for doubles or use a jail card.":"Roll the dice to begin."}
+function cityArt(name,group){
+ const seed=[...name].reduce((a,ch)=>a+ch.charCodeAt(0),0),accent=C[group]||"#579b77";
+ const heights=Array.from({length:6},(_,i)=>10+((seed*(i+3)+i*11)%17));
+ let x=2,buildings="";
+ heights.forEach((h,i)=>{
+  const w=12+(i%2)*2,y=34-h,fill=i%3===0?accent:(i%3===1?"#7aa9a0":"#d7b986");
+  buildings+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1.5" fill="'+fill+'" stroke="#23463b" stroke-width=".8"/>';
+  for(let wy=y+4;wy<32;wy+=5){for(let wx=x+3;wx<x+w-2;wx+=5)buildings+='<rect x="'+wx+'" y="'+wy+'" width="2.2" height="2.6" rx=".4" fill="#fff4ce" opacity=".94"/>'}
+  x+=15;
+ });
+ let landmark="";
+ if(name==="Mysuru") landmark='<path d="M26 34V23L31 17L36 23V34M40 34V19L46 12L52 19V34M56 34V23L61 17L66 23V34" fill="#f2d79a" stroke="#8a5f3a" stroke-width="1.5"/><path d="M30 17L31 13L32 17M45 12L46 7L47 12M60 17L61 13L62 17" fill="#c58a42"/>';
+ else if(name==="Bengaluru") landmark='<rect x="42" y="8" width="13" height="26" rx="1" fill="#5f9fb4" stroke="#28556b"/><path d="M48 8V4H51V8" fill="#e7bc58"/><path d="M45 13H52M45 18H52M45 23H52M45 28H52" stroke="#d9f0ea" stroke-width="1.4"/>';
+ else if(name==="Mumbai") landmark='<path d="M12 34V22H24V34M16 22V17H21V22M70 34V13H82V34M75 13V7H78V13" fill="#6e9ea8" stroke="#355f69" stroke-width="1.2"/><path d="M2 37Q15 33 28 37T54 37T98 37V42H2Z" fill="#66b8c5"/>';
+ else if(name==="Delhi") landmark='<path d="M36 34V26Q50 8 64 26V34Z" fill="#e8c18b" stroke="#976d42" stroke-width="1.5"/><path d="M42 34V26Q50 16 58 26V34" fill="#56786d" stroke="#976d42"/>';
+ else if(name==="Hyderabad") landmark='<path d="M35 34V20H40V34M45 34V15H50V34M55 34V20H60V34" fill="#e4c58f" stroke="#805b3a" stroke-width="1.4"/><path d="M33 20L37.5 14L42 20M43 15L47.5 9L52 15M53 20L57.5 14L62 20" fill="#f2dcae" stroke="#805b3a" stroke-width="1.2"/>';
+ else if(name==="Jaipur") landmark='<path d="M33 34V20H67V34M36 20V14H42V20M47 20V11H53V20M58 20V14H64V20" fill="#e6a18d" stroke="#9e5b4f" stroke-width="1.5"/><path d="M39 25H43V29H39ZM48 25H52V29H48ZM57 25H61V29H57Z" fill="#fff0ce"/>';
+ else if(name==="Kolkata") landmark='<path d="M8 27H92M14 27Q50 8 86 27M20 27V35M35 27V35M50 27V35M65 27V35M80 27V35" fill="none" stroke="#8f6750" stroke-width="2"/><path d="M5 35H95" stroke="#507f86" stroke-width="2"/>';
+ else if(name==="Goa") landmark='<path d="M23 36Q31 20 24 10M24 12Q11 9 9 4Q24 4 25 11M25 12Q35 3 43 7Q35 15 25 13M24 12Q16 17 9 15Q14 8 24 12" fill="#408568" stroke="#245d4e" stroke-width="1.2"/><path d="M53 34L69 21L86 34Z" fill="#cf946c" stroke="#8b5d48" stroke-width="1.2"/><path d="M59 34V27H78V34" fill="#f7e4bd"/>';
+ else if(name==="Srinagar"||name==="Shimla") landmark='<path d="M6 34L28 11L42 25L57 7L88 34Z" fill="#9cbbb0" stroke="#547e76" stroke-width="1.2"/><path d="M20 20L28 11L34 18L28 16Z M49 16L57 7L66 18L57 14Z" fill="#fff8e6"/><path d="M2 37Q20 34 38 37T74 37T98 37V42H2Z" fill="#76bdbe"/>';
+ const nameSafe=name.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ return '<svg class="tile-art city-art" viewBox="0 0 100 44" role="img" aria-label="'+nameSafe+' illustrated city" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="44" rx="4" fill="#dceee9"/><circle cx="83" cy="8" r="4" fill="#f2c45d"/><path d="M0 31Q22 27 42 31T100 30V44H0Z" fill="#d6e6d0"/>'+buildings+landmark+'<path d="M0 38H100" stroke="#547d69" stroke-width="1.2"/></svg>';
+}
+function cornerArt(kind){
+ if(kind==="jail")return '<svg class="tile-art corner-art" viewBox="0 0 100 54" role="img" aria-label="Jail building illustration" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="6" width="70" height="44" rx="3" fill="#d9e0d8" stroke="#465b52" stroke-width="2"/><path d="M10 8L50 1L90 8" fill="#718579" stroke="#465b52" stroke-width="2"/><rect x="27" y="18" width="46" height="26" rx="2" fill="#f7f0dc" stroke="#465b52" stroke-width="2"/><path d="M34 18V44M42 18V44M50 18V44M58 18V44M66 18V44" stroke="#42584e" stroke-width="3"/><path d="M24 14H76" stroke="#b88e51" stroke-width="3"/></svg>';
+ if(kind==="police")return '<svg class="tile-art corner-art" viewBox="0 0 100 54" role="img" aria-label="Police station illustration" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="17" width="68" height="33" rx="2" fill="#d8e8df" stroke="#365c4a" stroke-width="2"/><path d="M11 18L50 3L89 18Z" fill="#73977c" stroke="#365c4a" stroke-width="2"/><rect x="40" y="31" width="20" height="19" fill="#8dbaa7" stroke="#365c4a" stroke-width="1.5"/><rect x="24" y="25" width="11" height="10" fill="#f8f0d9" stroke="#365c4a"/><rect x="65" y="25" width="11" height="10" fill="#f8f0d9" stroke="#365c4a"/><path d="M50 3V0M44 9H56" stroke="#f2c45d" stroke-width="3"/></svg>';
+ if(kind==="park")return '<svg class="tile-art corner-art" viewBox="0 0 100 54" role="img" aria-label="Green city park illustration" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="86" height="41" rx="5" fill="#e3f0d7"/><path d="M8 43Q27 27 49 43T92 40" fill="none" stroke="#8fb88a" stroke-width="8"/><rect x="25" y="24" width="4" height="18" fill="#8d6b48"/><circle cx="27" cy="19" r="11" fill="#5c9f69"/><rect x="68" y="26" width="4" height="15" fill="#8d6b48"/><circle cx="70" cy="21" r="9" fill="#74ae74"/><path d="M42 39H59L55 33H46Z" fill="#ca9c69" stroke="#8d6b48"/></svg>';
+ return '<svg class="tile-art corner-art" viewBox="0 0 100 54" role="img" aria-label="City start gate illustration" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="54" rx="4" fill="#e1eee1"/><path d="M12 48V19H26V48M74 48V19H88V48M9 19L19 7L29 19M71 19L81 7L91 19" fill="#8ab59a" stroke="#376c51" stroke-width="2"/><path d="M24 30H76V48H24Z" fill="#d7bb7c" stroke="#9b7a45" stroke-width="2"/><path d="M42 48V32Q50 22 58 32V48" fill="#527b63" stroke="#9b7a45" stroke-width="1.5"/></svg>';
+}
 function boardCoords(i){if(i<=10)return [10,10-i];if(i<=20)return [20-i,0];if(i<=30)return [0,i-20];return [i-30,10]}
 function renderBoard(){const b=$("board");b.innerHTML="";const occupied=new Map();players.filter(p=>!p.bankrupt).forEach(p=>{if(!occupied.has(p.pos))occupied.set(p.pos,[]);occupied.get(p.pos).push(p)});spaces.forEach((s,i)=>{const [r,c]=boardCoords(i),el=document.createElement("div");el.className="tile"+([0,10,20,30].includes(i)?" corner":"");el.style.gridRow=r+1;el.style.gridColumn=c+1;if(i===0){el.innerHTML='<div class="name">START ➜</div><div>Collect ₹200</div>'}else if(i===10){el.innerHTML='<div class="name">🔒 JAIL</div><div>Visiting / detained</div>'}else if(i===20){el.innerHTML='<div class="name">🅿 FREE</div><div>PARKING</div>'}else if(i===30){el.innerHTML='<div class="name">👮 GO TO JAIL</div>'}else if(s.type==="property"){el.innerHTML='<div class="band" style="background:'+C[s.group]+'"></div><div class="name">'+s.name+'</div><div class="price">'+money(s.price)+'</div>'+(s.houses?'<div>'+("🏠".repeat(Math.min(s.houses,4))+(s.houses===5?" 🏨":""))+'</div>':'')}else{const icon=s.type==="rail"?"🚆":s.type==="utility"?"⚡":s.type==="chance"?"❓":s.type==="chest"?"📦":s.type==="tax"?"🧾":"◆";el.innerHTML='<div>'+icon+'</div><div class="name">'+s.name+'</div>'+(s.price?'<div class="price">'+money(s.price)+'</div>':'')}if(s.owner!==null){el.style.outline="3px solid "+players[s.owner].color;el.style.outlineOffset="-3px"}const own=(occupied.get(i)||[]).map(p=>'<span class="token" title="'+p.name+'">'+["🔴","🔵","🟡","🟢"][p.id]+'</span>').join("");el.insertAdjacentHTML("beforeend",'<div class="tokens">'+own+'</div>');el.title=s.name+(s.owner!==null?" — owned by "+players[s.owner].name:"");b.appendChild(el)});const center=document.createElement("div");center.className="tile center";center.innerHTML='<div><div style="font-size:2rem">🏙️</div><h1>CHIRANTH\'S BUSINESS</h1><p>Build your Indian property empire.</p><p>Buy · Auction · Trade · Build · Win</p><div class="status">'+(players.length?players[current].name+"'s turn":"Start a match")+'</div></div>';b.appendChild(center)}
 function renderPlayers(){$("players").innerHTML=players.map((p,i)=>'<div class="player '+(i===current&&!p.bankrupt?"active":"")+'"><div class="playerline"><span>'+p.name+(p.jailed?" 🔒":"")+(p.bankrupt?" (OUT)":"")+'</span><span>'+money(p.cash)+'</span></div><div class="small">Space '+(p.pos+1)+' · '+spaces[p.pos].name+' · '+spaces.filter(s=>s.owner===p.id).length+' properties</div></div>').join("");$("turnName").textContent=players[current]?.name||"Player 1";$("rollBtn").disabled=rolled||gameOver||!players.length||!!players[current]?.bankrupt;$("endBtn").disabled=!rolled||gameOver||moving}
@@ -373,6 +402,51 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 @keyframes panel-arrive{from{opacity:.6;transform:translateY(5px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:900px){body{background-attachment:scroll}.tile:not(.center):hover{transform:none}.panel:hover,.board-wrap:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.tile:not(.center):hover,button:hover:not(:disabled),.leaderboard-row:hover,.milestone-item:hover{transform:none}}
+</style>
+
+<style id="compact-city-board-style">
+/* Compact square board */
+main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
+.board-wrap{width:100%;max-width:790px;justify-self:center;align-self:start}
+.board{width:100%;aspect-ratio:1 / 1;grid-template-rows:repeat(11,minmax(0,1fr));gap:2px}
+.tile{padding:3px 2px;border-radius:5px;font-size:clamp(6px,.72vw,10px)}
+.tile .band{height:4px;margin-bottom:1px;border-radius:2px}
+.tile .name{font-size:clamp(6px,.72vw,10px);line-height:1.02}
+.tile .price{font-size:clamp(6px,.62vw,9px);line-height:1}
+.tile-art{display:block;width:100%;height:clamp(12px,2vw,24px);flex:0 0 auto;border-radius:3px;overflow:hidden}
+.corner-art{height:clamp(18px,2.6vw,30px)}
+.city-art{filter:saturate(.95)}
+.tile .tokens{min-height:9px;align-items:center}
+.tile .token{font-size:clamp(8px,1vw,13px);line-height:1}
+.tile.corner{gap:1px}
+.tile.center{min-width:0;min-height:0}
+@media(max-width:900px){
+ main{grid-template-columns:minmax(0,1fr);gap:12px}
+ .board-wrap{max-width:720px;width:100%;padding:6px}
+ .board{aspect-ratio:1 / 1;grid-template-rows:repeat(11,minmax(0,1fr))}
+ .tile{padding:2px 1px}
+ .tile-art{height:clamp(10px,2.3vw,20px)}
+ .corner-art{height:clamp(15px,3vw,25px)}
+ .tile .band{height:3px}
+ .tile .name{font-size:clamp(6px,1.25vw,9px)}
+ .tile .price{font-size:clamp(5px,.95vw,8px)}
+}
+@media(max-width:600px){
+ main{padding:7px;gap:9px}
+ .board-wrap{padding:3px;border-radius:10px}
+ .board{gap:1px}
+ .tile{padding:1px 0;border-radius:3px}
+ .tile-art{height:clamp(7px,2.25vw,11px)}
+ .corner-art{height:clamp(10px,3vw,15px)}
+ .tile .band{height:2px}
+ .tile .name{font-size:clamp(5px,1.5vw,7px);overflow-wrap:anywhere}
+ .tile .price{display:none}
+ .tile .tokens{min-height:7px}
+ .tile .token{font-size:8px}
+ .tile.center{padding:4px;border-radius:6px}
+ .center h1{font-size:clamp(14px,4.7vw,24px)}
+ .center p{font-size:clamp(7px,2vw,10px);margin:3px}
+}
 </style>
 <script id="ai-opponents-runtime">
 (()=>{
