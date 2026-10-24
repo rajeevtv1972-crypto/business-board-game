@@ -95,6 +95,58 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 <style id="online-multiplayer-style">
 .online-box{margin-top:14px;padding:13px;border:1px solid #d7e3d1;border-radius:14px;background:linear-gradient(145deg,#f7fbf2,#fffdf8)}.online-box h3{font-size:.9rem;margin:0 0 9px}.online-fields{display:grid;grid-template-columns:1fr;gap:7px}.online-fields input,.online-box input{min-width:0;width:100%;padding:10px;border-radius:9px;border:1px solid #cbd8c4;background:#fff;color:var(--ink);font:inherit}.online-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.online-actions button{padding:9px 6px;font-size:.8rem}.online-box #roomShare{display:grid;gap:7px;margin-top:8px}.online-box #roomShare[hidden]{display:none}.online-box #copyRoomBtn{width:100%}.online-status-online{color:#236342!important;font-weight:850}.online-status-warn{color:#956319!important;font-weight:750}.online-box .save-status{overflow-wrap:anywhere}
 </style>
+
+<style id="viewport-fit-fix">
+/* Keep the whole board in view on desktop instead of sizing every tile from viewport width. */
+@media (min-width: 901px) {
+  header { position:relative; }
+  main {
+    grid-template-columns:minmax(0, min(68vw, calc(100dvh - 245px))) 340px;
+    justify-content:center;
+    align-items:start;
+    gap:16px;
+    padding:12px 18px;
+  }
+  .board-wrap { min-width:0; width:100%; padding:8px; }
+  .board {
+    grid-template-rows:repeat(11, minmax(0, min(5.2vw, calc((100dvh - 285px)/11))));
+    gap:2px;
+  }
+  .tile { min-height:0; }
+  .current-turn-panel { padding:10px; }
+}
+/* On phones, reserve room for the roll/done controls in the same viewport as the board. */
+@media (max-width: 600px) and (orientation: portrait) {
+  header { position:relative; padding:7px 10px; gap:5px; }
+  .brand { font-size:1rem; line-height:1.1; }
+  header .sub { font-size:.64rem; line-height:1.15; }
+  header .pill { padding:3px 6px; font-size:.58rem; }
+  #soundToggle { padding:5px 7px; font-size:.68rem; }
+  main { padding:5px; gap:5px; }
+  .board-wrap { width:min(100%, calc(100dvh - 340px), 43dvh); max-width:100%; margin-inline:auto; padding:3px; }
+  .board { grid-template-rows:repeat(11,minmax(0,1fr)); gap:1px; }
+  .board-wrap > .notice { display:none; }
+  .tile { min-height:0; padding:1px 0; }
+  .tile .band { height:2px; }
+  .tile .price { display:none; }
+  .tile-art { max-height:9px; }
+  .corner-art { max-height:11px; }
+  .tile .name { font-size:clamp(5px,1.45vw,7px); line-height:1; }
+  .current-turn-panel { padding:5px; gap:4px; }
+  .primary-game-actions button { min-height:29px; }
+  .turn-stage { gap:2px; }
+  .seat-player-card { padding:3px 2px; }
+  .seat-player-cash { margin:2px 0; }
+  .turn-center .dice { font-size:1.25rem; }
+  .dice-buttons button { min-height:27px; padding:3px 1px; }
+  .turn-status { font-size:.48rem; }
+}
+@media (max-width: 380px) and (orientation: portrait) {
+  .board-wrap { width:min(100%, calc(100dvh - 325px), 41dvh); }
+  .primary-game-actions button { min-height:27px; font-size:.46rem; }
+}
+</style>
+
 </head>
 <body>
 <header><div><div class="brand">CHIRANTH\’S <span>BUSINESS</span> 🎲</div><div class="sub">An original Indian property-trading game · Local pass-and-play prototype</div></div><div class="pill">2–4 players · No account required</div></header>
