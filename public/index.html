@@ -124,6 +124,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 
 
 <nav id="quickTools" class="quick-tools" aria-label="Game information panels">
+  <button type="button" id="mobileMenuBtn" class="mobile-menu-button" aria-expanded="false" aria-controls="quickTools"><span aria-hidden="true">☰</span> Menu</button>
   <button type="button" class="tool-button" data-open-tool="players" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">👥</span> Players</button>
   <button type="button" class="tool-button" data-open-tool="online" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">🌐</span> Online Room</button>
   <button type="button" class="tool-button" data-open-tool="portfolio" aria-expanded="false" aria-controls="toolPanelHost"><span aria-hidden="true">📊</span> Portfolio</button>
@@ -787,6 +788,111 @@ main{max-width:1100px;padding:12px;display:flex;flex-direction:column;gap:12px}
  .seat-player-meta,.seat-player-foot{font-size:.61rem}
 }
 </style>
+
+<style id="mobile-no-scroll-play-layout">
+/* Phone-first play screen: fit the board and primary turn controls without forcing a scroll. */
+.mobile-menu-button{display:none}
+@media(max-width:600px) and (orientation:portrait){
+ html,body{min-height:100%;margin:0}
+ body{min-height:100dvh;background:linear-gradient(145deg,#e5eee0,#f6f2e7)}
+ header{min-height:38px;padding:4px 8px;gap:6px;flex-wrap:nowrap}
+ header .brand{font-size:clamp(.86rem,4vw,1.08rem);white-space:nowrap;letter-spacing:-.045em}
+ header .sub,header .pill{display:none}
+ header button{padding:5px 7px;font-size:.7rem;white-space:nowrap}
+ main{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:3px;max-width:100%;width:100%;margin:0}
+ .board-wrap{width:min(100%,calc(100dvh - 270px),56dvh);max-width:none;margin:0 auto;padding:2px;border-radius:9px;box-shadow:none;flex:0 0 auto}
+ .board{width:100%;aspect-ratio:.91 / 1;grid-template-columns:repeat(11,minmax(0,1fr));grid-template-rows:repeat(11,minmax(0,1fr));gap:1px}
+ .board-wrap .notice{display:none}
+ .tile{border-radius:3px;padding:1px 0;font-size:clamp(5px,1.5vw,7px)}
+ .tile .name{font-size:clamp(5px,1.35vw,7px);line-height:.98}
+ .tile .band{height:2px;margin-bottom:0}
+ .tile .price{display:none}
+ .tile .tokens{min-height:6px}
+ .tile .token{font-size:7px}
+ .tile-art{height:clamp(6px,1.8vw,9px)}
+ .corner-art{height:clamp(8px,2.6vw,13px)}
+ .tile.center{padding:2px;border-radius:4px}
+ .center h1{font-size:clamp(11px,3.3vw,17px);margin:1px}
+ .center p{font-size:clamp(6px,1.6vw,8px);margin:1px}
+ .center .status{font-size:6px;padding:2px 4px;margin-top:1px}
+ .delhi-building-badge{font-size:5px}
+ .current-turn-panel{width:100%;padding:5px;gap:5px;border-radius:10px;box-shadow:none;margin:0}
+ .primary-game-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+ .primary-game-actions button{min-width:0;min-height:35px;padding:4px 1px;font-size:clamp(.49rem,1.8vw,.68rem);line-height:1.05;letter-spacing:-.02em;border-radius:7px;white-space:normal;overflow-wrap:anywhere;box-shadow:0 2px 0 #0d3829}
+ .turn-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr) minmax(0,1fr);align-items:stretch;gap:3px}
+ .seat-player-group{display:grid;grid-template-columns:minmax(0,1fr);gap:3px}
+ .seat-player-card{min-width:0;padding:5px 3px;border-radius:7px;box-shadow:none}
+ .seat-player-card.is-active{box-shadow:inset 0 0 0 1px #39815e}
+ .seat-player-head{gap:3px}
+ .seat-player-avatar{width:19px;height:19px;flex-basis:19px;font-size:.65rem;border-width:1px}
+ .seat-player-name{font-size:clamp(.57rem,2.1vw,.72rem);line-height:1.05}
+ .seat-player-cash{font-size:clamp(.78rem,3vw,1rem);margin:4px 0;letter-spacing:-.04em}
+ .seat-player-meta{font-size:clamp(.48rem,1.7vw,.61rem);line-height:1.05}
+ .seat-player-foot{font-size:clamp(.47rem,1.6vw,.59rem);margin-top:4px;gap:2px}
+ .seat-turn-badge{font-size:.48rem;padding:1px 3px}
+ .turn-center{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:3px;min-width:0;padding:2px 0}
+ .current-turn-caption{font-size:.48rem;letter-spacing:.08em}
+ .current-player-name{font-size:clamp(.62rem,2.1vw,.78rem);line-height:1.05}
+ .turn-center .dice{min-width:0;width:100%;font-size:clamp(1.35rem,5.8vw,2rem);line-height:1;padding:3px 1px;letter-spacing:0;border-radius:7px;text-shadow:0 1px 0 #d5ded2}
+ .dice-buttons{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;width:100%;max-width:none}
+ .dice-buttons button{min-width:0;width:100%;min-height:30px;padding:5px 2px;font-size:clamp(.58rem,2vw,.72rem);letter-spacing:0;border-radius:7px}
+ .turn-status{min-height:0;font-size:clamp(.48rem,1.65vw,.59rem);line-height:1.08;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .jail-card-action{min-height:23px;padding:3px 2px;font-size:clamp(.45rem,1.55vw,.58rem);line-height:1.05;border-radius:6px}
+ #quickTools{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;margin:0;padding:0}
+ #mobileMenuBtn{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;min-height:31px;padding:5px 8px;border-radius:8px;font-size:.74rem;background:linear-gradient(145deg,#174c38,#103c2c);box-shadow:0 2px 0 #0d3829}
+ #quickTools:not(.menu-open) .tool-button{display:none}
+ #quickTools.menu-open{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ #quickTools.menu-open #mobileMenuBtn{grid-column:1/-1}
+ #quickTools.menu-open .tool-button{display:flex;min-height:35px;padding:6px 5px;font-size:.72rem;border-radius:8px}
+ #quickTools.menu-open .tool-button span{font-size:.85rem}
+ #toolPanelHost{margin:0;padding:7px;border-radius:10px;max-height:45dvh;overflow:auto;box-shadow:0 7px 20px #17251b12}
+ .tool-panel-host-head{font-size:.82rem;margin-bottom:6px}
+ .tool-panel{padding:8px;border-radius:9px}
+ .side{display:none;width:100%;grid-template-columns:minmax(0,1fr);gap:6px;margin:0}
+ main.mobile-menu-open .side{display:grid}
+ .side>.panel{padding:9px;border-radius:10px;box-shadow:none}
+ .side .field{margin:6px 0;gap:3px}
+ .side .field input,.side .field select{padding:7px}
+ .side button{padding:7px;font-size:.8rem}
+ .side .log{max-height:25dvh}
+ .tool-panel-host .players{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:380px) and (orientation:portrait){
+ .board-wrap{width:min(100%,calc(100dvh - 250px),56dvh)}
+ .primary-game-actions button{font-size:.48rem;min-height:32px}
+ .seat-player-card{padding:4px 2px}
+ .seat-player-avatar{width:16px;height:16px;flex-basis:16px}
+ .seat-player-name{font-size:.55rem}
+ .seat-player-cash{font-size:.76rem}
+ .seat-player-meta,.seat-player-foot{font-size:.46rem}
+ .turn-center .dice{font-size:1.35rem}
+ .dice-buttons button{min-height:27px;font-size:.57rem}
+}
+@media(max-width:900px) and (orientation:landscape){
+ header{padding:5px 10px}
+ header .sub{display:none}
+ main{padding:5px;gap:7px}
+ .board-wrap{width:min(52vw,calc(100dvh - 130px));max-width:none;padding:3px}
+ .current-turn-panel{padding:6px;gap:6px}
+ .primary-game-actions{gap:4px}
+ .primary-game-actions button{min-height:34px;padding:5px 2px;font-size:.64rem}
+ .turn-stage{grid-template-columns:minmax(0,1fr) minmax(0,.8fr) minmax(0,1fr);gap:5px}
+ .seat-player-card{padding:5px}
+ .seat-player-cash{font-size:.9rem;margin:3px 0}
+ .turn-center .dice{min-width:0;font-size:1.7rem;padding:2px}
+ .dice-buttons button{min-height:29px;padding:4px}
+ #quickTools{grid-template-columns:1fr}
+ #mobileMenuBtn{display:flex}
+ #quickTools:not(.menu-open) .tool-button{display:none}
+ #quickTools.menu-open{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #quickTools.menu-open #mobileMenuBtn{grid-column:1/-1}
+ #quickTools.menu-open .tool-button{display:flex;min-height:32px;padding:5px;font-size:.65rem}
+ #quickTools.menu-open .tool-button span{font-size:.8rem}
+ .side{display:none}
+ main.mobile-menu-open .side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tool-panel-host{max-height:55dvh;overflow:auto}
+}
+</style>
 <script id="ai-opponents-runtime">
 (()=>{
  const countEl=document.getElementById('playerCount'),aiEl=document.getElementById('aiCount'),hint=document.getElementById('aiHint'),start=document.getElementById('startBtn');
@@ -901,6 +1007,32 @@ main{max-width:1100px;padding:12px;display:flex;flex-direction:column;gap:12px}
  buttons.forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.openTool)));
  close.addEventListener('click',closePanels);
  closePanels();
+})();
+</script>
+
+
+<script id="mobile-menu-runtime">
+(()=>{
+ const button=document.getElementById('mobileMenuBtn');
+ const nav=document.getElementById('quickTools');
+ const main=document.querySelector('main');
+ if(!button||!nav||!main)return;
+ const mobile=()=>window.matchMedia('(max-width: 600px), (max-width: 900px) and (orientation: landscape)').matches;
+ button.addEventListener('click',()=>{
+  const open=!nav.classList.contains('menu-open');
+  nav.classList.toggle('menu-open',open);
+  main.classList.toggle('mobile-menu-open',open);
+  button.setAttribute('aria-expanded',String(open));
+  button.innerHTML=open?'<span aria-hidden="true">✕</span> Close Menu':'<span aria-hidden="true">☰</span> Menu';
+ });
+ window.addEventListener('resize',()=>{
+  if(!mobile()){
+   nav.classList.remove('menu-open');
+   main.classList.remove('mobile-menu-open');
+   button.setAttribute('aria-expanded','false');
+   button.innerHTML='<span aria-hidden="true">☰</span> Menu';
+  }
+ });
 })();
 </script>
 
