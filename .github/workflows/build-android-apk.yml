@@ -19,6 +19,8 @@ jobs:
     name: Build installable debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      CI: "true"
     steps:
       - name: Check out game
         uses: actions/checkout@v4
@@ -41,6 +43,9 @@ jobs:
 
       - name: Install Capacitor dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Disable Capacitor telemetry prompts
+        run: npx cap telemetry off
 
       - name: Generate Android project
         run: npx cap add android
