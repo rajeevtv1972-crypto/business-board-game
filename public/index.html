@@ -99,13 +99,15 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #092d20}
 <body>
 <header><div><div class="brand">CHIRANTH\’S <span>BUSINESS</span> 🎲</div><div class="sub">An original Indian property-trading game · Local pass-and-play prototype</div></div><div class="pill">2–4 players · No account required</div></header>
 <main>
+<section id="currentTurnPanel" class="panel current-turn-panel"><h2>Current turn</h2><div id="turnName">Player 1</div><div id="dice" class="dice">⚄ ⚄</div><div id="turnStatus" class="small">Roll the dice to begin.</div><div class="actions" style="margin-top:12px"><button id="rollBtn">🎲 Roll dice</button><button id="endBtn" class="btn2" disabled>End turn</button><button id="buildBtn" class="btn2">🏠 Build / sell</button><button id="mortgageBtn" class="btn2">🏦 Mortgage / redeem</button><button id="tradeBtn" class="btn2">🤝 Trade</button><button id="cardBtn" class="btn2">🃏 Use jail card</button></div></section>
+
 <section class="board-wrap"><div id="board" class="board"></div><div class="notice">Original board layout and illustrative property values. This is an early local prototype; some rule flows are simplified and should be play-tested.</div></section>
 <aside class="side">
 <section class="panel"><h2>Match setup</h2><div class="field"><label for="playerCount">Total players</label><select id="playerCount"><option>2</option><option>3</option><option>4</option></select></div><div class="field"><label for="aiCount">🤖 AI opponents</label><select id="aiCount"><option value="0">0 · Local players only</option><option value="1">1 · Easy rival</option><option value="2">2 · Two rivals</option><option value="3">3 · Full AI table</option></select></div><div class="small" id="aiHint">You always play as Player 1. AI opponents take their turns automatically.</div><button id="startBtn">Start new match</button><div class="save-actions"><button id="saveGameBtn" class="btn2">💾 Save match</button><button id="resumeGameBtn" class="btn2">↩️ Resume saved</button></div><div id="saveGameStatus" class="save-status">Your match stays on this device when saved.</div><div class="online-box"><h3>🌐 Online room</h3><div class="online-fields"><input id="onlineName" maxlength="24" placeholder="Your display name" value="Player 1" aria-label="Display name"><input id="onlineCode" maxlength="8" placeholder="Room code" aria-label="Room code" autocomplete="off"></div><div class="online-actions"><button id="createRoomBtn">Create room</button><button id="joinRoomBtn" class="btn2">Join room</button></div><div id="onlineStatus" class="save-status">Create a room and share its code with friends.</div><div id="roomShare" hidden><input id="roomShareLink" readonly aria-label="Shareable room link"><button id="copyRoomBtn" class="btn2">Copy invite link</button></div></div></section>
 <section class="panel"><h2>Players</h2><div id="players" class="players"></div></section>
 <section class="panel leaderboard-panel"><div class="leaderboard-head"><div><h2>🏆 Tycoon leaderboard</h2><div class="small">Live rankings & match milestones</div></div><span class="leaderboard-badge">RANKED</span></div><div id="leaderboardRows" class="leaderboard-rows"></div><div id="matchStats" class="match-stats"></div><div id="milestoneFeed" class="milestone-feed"></div><div class="leaderboard-note">Empire score combines cash, property value, buildings and mortgage exposure. Transaction totals are based on events recorded in this match log.</div></section>
 <section class="panel portfolio-panel"><div class="portfolio-heading"><div><h2>📊 Player portfolio</h2><div class="small">Live wealth breakdown</div></div><span class="portfolio-live">LIVE</span></div><label class="portfolio-label" for="portfolioPlayer">View player</label><select id="portfolioPlayer" class="portfolio-select" aria-label="Choose player portfolio"></select><div id="portfolioDashboard" aria-live="polite"><div class="portfolio-empty">Start a match to see your portfolio.</div></div></section>
-<section class="panel"><h2>Current turn</h2><div id="turnName">Player 1</div><div id="dice" class="dice">⚄ ⚄</div><div id="turnStatus" class="small">Roll the dice to begin.</div><div class="actions" style="margin-top:12px"><button id="rollBtn">🎲 Roll dice</button><button id="endBtn" class="btn2" disabled>End turn</button><button id="buildBtn" class="btn2">🏠 Build / sell</button><button id="mortgageBtn" class="btn2">🏦 Mortgage / redeem</button><button id="tradeBtn" class="btn2">🤝 Trade</button><button id="cardBtn" class="btn2">🃏 Use jail card</button></div></section>
+
 <section class="panel"><h2>Game log</h2><div id="log" class="log"></div></section>
 </aside></main>
 <div id="modal" class="modal"><div class="dialog"><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions" class="dialog-actions"></div></div></div>
@@ -446,6 +448,37 @@ main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
  .tile.center{padding:4px;border-radius:6px}
  .center h1{font-size:clamp(14px,4.7vw,24px)}
  .center p{font-size:clamp(7px,2vw,10px);margin:3px}
+}
+</style>
+
+<style id="current-turn-top-layout">
+/* Keep the full turn controls at the top so rolling never requires scrolling past the board. */
+.current-turn-panel{
+ grid-column:1/-1;
+ display:grid;
+ grid-template-columns:max-content minmax(95px,max-content) max-content minmax(130px,1fr) minmax(440px,2fr);
+ align-items:center;gap:12px;padding:12px 16px
+}
+.current-turn-panel h2{margin:0;white-space:nowrap}
+.current-turn-panel #turnName{font-weight:900}
+.current-turn-panel #dice{white-space:nowrap;font-size:1.7rem;line-height:1}
+.current-turn-panel #turnStatus{min-width:0}
+#currentTurnPanel .actions{margin-top:0!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;min-width:0}
+#currentTurnPanel .actions button{padding:9px 7px;font-size:.82rem;white-space:normal;line-height:1.15}
+#currentTurnPanel .actions button:first-child{grid-column:auto}
+@media(max-width:1150px) and (min-width:901px){
+ .current-turn-panel{grid-template-columns:max-content minmax(90px,max-content) max-content minmax(100px,1fr);gap:10px}
+ #currentTurnPanel .actions{grid-column:1/-1}
+}
+@media(max-width:900px){
+ .current-turn-panel{grid-column:1;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px}
+ .current-turn-panel h2{grid-column:1/-1}
+ .current-turn-panel #turnName{grid-column:1;grid-row:2}
+ .current-turn-panel #dice{grid-column:2;grid-row:2;text-align:right}
+ .current-turn-panel #turnStatus{grid-column:1/-1;grid-row:3}
+ #currentTurnPanel .actions{grid-column:1/-1;grid-row:4;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ #currentTurnPanel .actions button{min-height:40px;font-size:.83rem}
+ #currentTurnPanel .actions button:first-child{grid-column:1/-1}
 }
 </style>
 <script id="ai-opponents-runtime">
