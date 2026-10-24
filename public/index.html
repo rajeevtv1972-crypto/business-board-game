@@ -332,6 +332,48 @@ $("rollBtn").onclick=roll;$("endBtn").onclick=endTurn;$("buildBtn").onclick=buil
 <style id="ai-opponents-style">
 #aiHint{margin:-3px 0 10px;line-height:1.45}.ai-chip{display:inline-flex;align-items:center;gap:4px;background:#e7eee1;color:#23553c;border:1px solid #cddfc4;border-radius:99px;padding:2px 7px;font-size:.68rem;font-weight:850;margin-left:5px}
 </style>
+
+<style id="desi-tycoon-visual-upgrade">
+:root{--bg:#f2f5e9;--panel:#fffdf8;--ink:#17251d;--muted:#65766b;--green:#15543c;--lime:#d9f99d;--gold:#f2c45d;--line:#d8e2d4;--shadow:0 18px 44px #183b2917}
+body{background:radial-gradient(ellipse at 12% 0%,#d9ead2 0,transparent 38%),radial-gradient(ellipse at 92% 20%,#f8e7bd80 0,transparent 34%),linear-gradient(135deg,#eef4e8,#faf6ed 58%,#edf2e5);background-attachment:fixed}
+header{position:relative;background:#fffdf8d9;backdrop-filter:blur(14px);box-shadow:0 4px 22px #17251b08}
+.brand{display:inline-flex;align-items:center;gap:8px;text-shadow:0 2px 0 #ffffff}
+.board-wrap,.panel{border-color:#d9e3d5;background:linear-gradient(145deg,#ffffffed,#fbfcf5e8);box-shadow:var(--shadow);transition:box-shadow .22s,border-color .22s,transform .22s}
+.panel:hover,.board-wrap:hover{box-shadow:0 20px 48px #17251b1b;border-color:#c7d9c7}
+.board{perspective:900px}
+.tile{background:linear-gradient(145deg,#fffdf6,#f1f0e5);border-color:#cbd8c9;box-shadow:inset 0 1px #fff;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease,border-color .18s ease}
+.tile:not(.center):hover{z-index:3;transform:translateY(-3px) scale(1.025);box-shadow:0 8px 15px #17251b22;border-color:#71987c;filter:saturate(1.12)}
+.tile.corner{background:linear-gradient(145deg,#f0f7e8,#e2edd8)}
+.tile .band{border-radius:3px 3px 1px 1px;box-shadow:0 2px 4px #00000010}
+.tile .name{letter-spacing:-.015em}
+.tile .tokens{gap:3px}
+.token{display:inline-block;filter:drop-shadow(0 2px 1px #0005);animation:token-arrive .35s cubic-bezier(.2,.8,.2,1) both}
+.center{position:relative;overflow:hidden;isolation:isolate;box-shadow:inset 0 0 50px #061b12aa}
+.center:before,.center:after{content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:50%;border:1px solid #c9ec781c}
+.center:before{width:70%;aspect-ratio:1;left:15%;top:10%;box-shadow:0 0 0 22px #c9ec7808,0 0 0 44px #c9ec7805}
+.center:after{width:40%;aspect-ratio:1;left:30%;top:30%;background:radial-gradient(circle,#c9ec7810,transparent 68%)}
+.center h1{text-shadow:0 4px 20px #0005}
+.player{background:linear-gradient(135deg,#f8f9f2,#eef3e8);border-color:#e5ebdf;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.player.active{background:linear-gradient(135deg,#f2f9e9,#e7f3df);border-color:#45936a;box-shadow:inset 4px 0 #39815e,0 5px 16px #39815e12}
+button{box-shadow:0 3px 0 #0d3829;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 5px 0 #0d3829,0 8px 18px #17251b1a}
+button:active:not(:disabled){transform:translateY(1px);box-shadow:0 1px 0 #0d3829}
+.btn2{box-shadow:0 2px 0 #d0dbcc}
+.btn2:hover:not(:disabled){box-shadow:0 4px 0 #d0dbcc,0 7px 15px #17251b10}
+input,select{transition:border-color .18s,box-shadow .18s}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #9acb69;outline-offset:3px}
+.dice{transform-origin:center;filter:drop-shadow(0 5px 6px #0002)}
+.log>div{animation:log-arrive .24s ease-out both}
+.notice,.modal,.property-showcase{animation:panel-arrive .24s cubic-bezier(.2,.8,.2,1) both}
+.portfolio-hero,.leaderboard-row,.milestone-item,.match-stat{transition:transform .18s ease,box-shadow .18s ease}
+.leaderboard-row:hover,.milestone-item:hover{transform:translateX(3px)}
+.online-box{border-color:#b9d6bd;background:linear-gradient(135deg,#f4faef,#e8f3e7)}
+@keyframes token-arrive{from{transform:translateY(5px) scale(.75);opacity:.35}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes log-arrive{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes panel-arrive{from{opacity:.6;transform:translateY(5px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:900px){body{background-attachment:scroll}.tile:not(.center):hover{transform:none}.panel:hover,.board-wrap:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.tile:not(.center):hover,button:hover:not(:disabled),.leaderboard-row:hover,.milestone-item:hover{transform:none}}
+</style>
 <script id="ai-opponents-runtime">
 (()=>{
  const countEl=document.getElementById('playerCount'),aiEl=document.getElementById('aiCount'),hint=document.getElementById('aiHint'),start=document.getElementById('startBtn');
