@@ -217,7 +217,7 @@ function detailEscape(value){return String(value??"").replace(/&/g,"&amp;").repl
 function showTileDetails(s){
  const esc=detailEscape,owner=s.owner===null?"Bank":(players[s.owner]?.name||"Bank");
  const price=s.price?money(s.price):"—";
- let body='<div class="tile-detail"><div class="tile-detail-top"><span class="tile-detail-tag">'+esc(s.type==="property"?(s.group+" colour group"):s.type==="rail"?"Railway / transport":s.type==="utility"?"Utility":"Board space")+'</span><span class="tile-detail-owner">Owner: <b>'+esc(owner)+'</b></span></div><h3 class="tile-detail-name">'+esc(s.name)+'</h3>';
+ let body='<div class="tile-detail"><div class="tile-detail-top"><span class="tile-detail-tag">'+esc(s.type==="property"?(s.group+" colour group"):s.type==="rail"?"Railway / transport":s.type==="utility"?"Utility":"Board space")+'</span><span class="tile-detail-owner">Owner: <b>'+esc(owner)+'</b></span></div>'+(s.name==="Delhi"&&s.type==="property"?'<img class="delhi-property-card-art" src="/cards/delhi-property-card.webp" alt="Delhi illustrated property card, purchase price ₹240" loading="eager">':'<h3 class="tile-detail-name">'+esc(s.name)+'</h3>');
  if(s.type==="property"){
   const group=groupMembers(s.group),allOwned=s.owner!==null&&group.every(x=>x.owner===s.owner),factors=[1,5,15,35,45,55];
   body+='<div class="tile-detail-summary"><div><small>Purchase price</small><b>'+price+'</b></div><div><small>Build cost per level</small><b>'+money(s.buildCost)+'</b></div><div><small>Mortgage value</small><b>'+money(Math.round(s.price/2))+'</b></div></div>';
@@ -582,6 +582,11 @@ main{grid-template-columns:minmax(0,1fr) 330px;align-items:start}
  .tile-detail-name{font-size:1.4rem}
  .tile-rent-row{padding:8px;font-size:.8rem}
 }
+</style>
+
+<style id="delhi-property-card-art-style">
+.delhi-property-card-art{display:block;width:min(100%,280px);max-height:44vh;height:auto;object-fit:contain;margin:12px auto 16px;border:1px solid #d7c79f;border-radius:14px;background:#f9f4e8;box-shadow:0 12px 30px #1c2e241c}
+@media(max-width:520px){.delhi-property-card-art{width:min(100%,235px);max-height:37vh;margin:8px auto 12px}}
 </style>
 <script id="ai-opponents-runtime">
 (()=>{
